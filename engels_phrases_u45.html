@@ -1,405 +1,293 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Engels Master U45 - Zinnen</title>
-    <style>
-        :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .scene { width: 100%; max-width: 420px; height: 320px; perspective: 1000px; margin: 20px 0; }
-        .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; overflow-wrap: break-word; }
-        .card-front { color: var(--primary); }
-        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
-        .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.55; letter-spacing: 1px; }
-        .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
-        .is-marked .star { display: block; }
-        .is-marked .card-face { border: 3px solid var(--orange); }
-        .sentence { font-size: 1.45rem; line-height: 1.45; font-weight: 500; }
-        .sentence strong { font-weight: 800; }
-        .back-word { font-size: 1.65rem; font-weight: 800; margin-bottom: 12px; }
-        .back-nl { font-size: 1.2rem; line-height: 1.4; }
-        .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
-        button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
-        .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
-        .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
-        .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
-        #list-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; box-sizing: border-box; }
-        .word-item { display: flex; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .word-item .en { font-weight: bold; }
-        .word-item .nl { color: #666; }
-        .word-item .ex { color: #888; font-size: 0.9rem; margin-top: 6px; }
-        .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
-        .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
-        .sort-bar button.active { background: var(--primary); color: white; }
-        .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
-        .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Engels Phrases U4-5</title>
+  <style>
+    :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    .scene { width: 100%; max-width: 420px; height: 300px; perspective: 1000px; margin: 20px 0; }
+    .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+    .card.is-flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; overflow-wrap: break-word; }
+    .card-front { color: var(--primary); }
+    .card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
+    .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.55; letter-spacing: 1px; }
+    .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+    .is-marked .star { display: block; }
+    .is-marked .card-face { border: 3px solid var(--orange); }
+    .phrase { font-size: 1.55rem; line-height: 1.45; font-weight: 600; }
+    .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
+    button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+    .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+    .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+    .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+    #list-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+    .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; box-sizing: border-box; }
+    .word-item { display: flex; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .word-item .nl { font-weight: bold; }
+    .word-item .en { color: #666; margin-top: 6px; }
+    .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+    .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
+    .sort-bar button.active { background: var(--primary); color: white; }
+    .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+    .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+  </style>
 </head>
 <body>
-    <h3 style="color: var(--primary); margin-top: 10px;">Engels – zinnen & woordenschat</h3>
+  <h3 style="color: var(--primary); margin-top: 10px;">Engels – phrases</h3>
 
-    <div class="scene" onclick="flip()">
-        <div class="card" id="card-element">
-            <div class="card-face card-front">
-                <div class="star">★</div>
-                <div class="label" id="label-front">Engelse zin</div>
-                <div id="text-front" class="sentence">...</div>
-                <button class="speak-btn" id="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
-            </div>
-            <div class="card-face card-back">
-                <div class="label" id="label-back">Betekenis</div>
-                <div id="text-back">...</div>
-            </div>
-        </div>
+  <div class="scene" onclick="flip()">
+    <div class="card" id="card-element">
+      <div class="card-face card-front">
+        <div class="star">★</div>
+        <div class="label" id="label-front">Nederlands</div>
+        <div id="text-front" class="phrase">...</div>
+        <button class="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
+      </div>
+      <div class="card-face card-back">
+        <div class="label" id="label-back">Engels</div>
+        <div id="text-back" class="phrase">...</div>
+      </div>
     </div>
+  </div>
 
-    <div class="controls">
-        <button onclick="prev()">⬅️ Vorige</button>
-        <button onclick="next()">Volgende ➡️</button>
-        <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
-        <button onclick="shuffle()">🔀 Husselen</button>
-        <button id="lang-btn" onclick="toggleMode()">🔄 Zin ➔ Woord</button>
-        <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
-        <button class="btn-blue" onclick="openList()">📋 Woordenlijst & Zoeken</button>
-        <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+  <div class="controls">
+    <button onclick="prev()">⬅️ Vorige</button>
+    <button onclick="next()">Volgende ➡️</button>
+    <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+    <button onclick="shuffle()">🔀 Husselen</button>
+    <button id="lang-btn" onclick="toggleLang()">🔄 EN ➔ NL</button>
+    <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+    <button class="btn-blue" onclick="openList()">📋 Zinnenlijst & Zoeken</button>
+    <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+  </div>
+
+  <div class="progress" id="progress">Kaart 1 van ...</div>
+
+  <div id="list-modal">
+    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+      <input type="text" class="search-box" id="search-input" placeholder="Zoek zin..." oninput="renderList()">
+      <div class="sort-bar">
+        <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+        <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+      </div>
     </div>
+    <div id="list-container"></div>
+    <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+  </div>
 
-    <div class="progress" id="progress">Kaart 1 van ...</div>
+  <script>
+    const allPhrases = [
+      { nl: "Hij heeft een groen shirt en groene schoenen aan.", en: "He's got a green shirt and green shoes." },
+      { nl: "Er is een vrouw met een hoed met tijgerprint.", en: "There is a woman in a tiger print hat." },
+      { nl: "Die mannen zien eruit als modellen.", en: "These men look like models." },
+      { nl: "Ze is dat kleine meisje met de donkere ogen.", en: "She is the short girl with dark eyes." },
+      { nl: "De meeste modellen zijn lang en dun.", en: "Most models are tall and slim." },
+      { nl: "John is die kleine jongen met rood haar uit mijn klas.", en: "John is the short guy in my class with red hair." },
+      { nl: "Kijk eens naar die prachtige man - lang, donker en knap!", en: "Look at that gorgeous man – tall, dark and good-looking!" },
 
-    <div id="list-modal">
-        <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
-            <input type="text" class="search-box" id="search-input" placeholder="Zoek woord of betekenis..." oninput="renderList()">
-            <div class="sort-bar">
-                <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
-                <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
-            </div>
-        </div>
-        <div id="list-container"></div>
-        <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
-    </div>
+      { nl: "Staat dit mij goed?", en: "Does this look good on me?" },
+      { nl: "Het zit erg lekker.", en: "It's very comfortable." },
+      { nl: "Ik vind dat het er cool uitziet.", en: "I think it looks cool." },
+      { nl: "De nieuwste mode is gewoon raar.", en: "These latest fashions are just silly." },
+      { nl: "Naar mijn mening zijn rokken voor vrouwen.", en: "To my mind, skirts are for women." },
+      { nl: "Persoonlijk hou ik niet van rokken.", en: "Personally, I don't like skirts." },
+      { nl: "Ik denk dat ik liever strepen wil.", en: "I think I prefer stripes." },
+      { nl: "Het is perfect voor kerstfeestjes!", en: "It's perfect for Christmas parties!" },
+      { nl: "Wat vind je van stippen?", en: "What do you think about spots?" },
+      { nl: "Het staat je gewoon niet, ben ik bang.", en: "It just doesn't suit you, I'm afraid." },
 
-    <script>
-        const allWords = [
-            { sentence: "I've got a problem. Can you give me some <strong>advice</strong>?", word: "advice", nl: "advies" },
-            { sentence: "I don't like this shirt. Can I try <strong>another</strong> one?", word: "another", nl: "nog één / een andere" },
-            { sentence: "You had an accident? That's <strong>awful</strong>!", word: "awful", nl: "afschuwelijk" },
-            { sentence: "Which do you prefer: tight clothes or <strong>baggy</strong> clothes?", word: "baggy", nl: "wijd / flodderig" },
-            { sentence: "It's going to be a long walk in the rain. Maybe you should wear <strong>boots</strong>.", word: "boots", nl: "laarzen / hoge schoenen" },
-            { sentence: "Today it was <strong>exactly</strong> 20.7 degrees Celsius.", word: "exactly", nl: "precies" },
-            { sentence: "There is a Manga <strong>exhibition</strong> in the British Museum this summer.", word: "exhibition", nl: "tentoonstelling" },
-            { sentence: "We don't know how this machine works. Could you <strong>explain</strong> it to us?", word: "explain", nl: "uitleggen" },
-            { sentence: "When it's really cold, it's best to wear a hat, a scarf and <strong>gloves</strong>.", word: "gloves", nl: "handschoenen" },
-            { sentence: "My sister can't walk in <strong>high heels</strong>. She always wears flats.", word: "high heels", nl: "hoge hakken" },
-            { sentence: "Put on your <strong>jacket</strong>. It's cold outside.", word: "jacket", nl: "jas / colbert" },
-            { sentence: "I <strong>just</strong> can't believe I met that famous model!", word: "just", nl: "gewoon" },
-            { sentence: "I like our new volleyball <strong>kit</strong>, especially the shirts.", word: "kit", nl: "uitrusting" },
-            { sentence: "We never <strong>laugh</strong> at Frank's jokes, because they aren't that funny.", word: "laugh", nl: "lachen" },
-            { sentence: "I forgot to close the door when I left. That was a big <strong>mistake</strong>.", word: "mistake", nl: "fout / vergissing" },
-            { sentence: "Sometimes Chris wears jeans, but <strong>mostly</strong> she wears dresses.", word: "mostly", nl: "vooral / meestal" },
-            { sentence: "That is such a great <strong>outfit</strong>! Where did you buy that sweater?", word: "outfit", nl: "(kleding)set" },
-            { sentence: "Driss loves these shoes. He wants to buy an extra <strong>pair</strong>.", word: "pair", nl: "paar" },
-            { sentence: "Which of those boys is Gerry? Can you <strong>point</strong> him <strong>out</strong> to me?", word: "point out", nl: "wijzen naar / aanwijzen" },
-            { sentence: "The first <strong>rule</strong> of fashion is: wear the correct size!", word: "rule", nl: "regel" },
-            { sentence: "My dad works for a bank. He always wears a <strong>suit</strong> and tie to work.", word: "suit", nl: "pak" },
-            { sentence: "Why are you wearing <strong>trainers</strong>? Are you playing sports today?", word: "trainers", nl: "sportschoenen" },
-            { sentence: "Jeans, shorts, slacks – they're all <strong>trousers</strong>.", word: "trousers", nl: "broek(en)" },
-            { sentence: "I'm going to <strong>whisper</strong>, so that the teacher can't hear me.", word: "whisper", nl: "fluisteren" },
+      { nl: "Hoeveel kosten deze truien?", en: "How much are these sweaters?" },
+      { nl: "Ze kosten slechts £14,50 per stuk.", en: "They only cost £14.50 each." },
+      { nl: "Pardon, heeft u dit ontwerp in maat M?", en: "Excuse me, have you got this design in a medium?" },
+      { nl: "We hebben de witte in een M.", en: "We've got the white one in a medium." },
+      { nl: "Ik denk dat mijn zus een S'je heeft.", en: "I think my sister's a small." },
 
-            { sentence: "I must <strong>admit</strong> that I don't know the answer.", word: "admit", nl: "toegeven" },
-            { sentence: "I don't like spiders. I'm <strong>afraid</strong> of them.", word: "afraid", nl: "bang" },
-            { sentence: "Bess lost so much weight; she needs a <strong>belt</strong> to hold up her jeans.", word: "belt", nl: "riem" },
-            { sentence: "Can you sew this <strong>button</strong> on for me? I don't know how to do it.", word: "button", nl: "knoop" },
-            { sentence: "We wear a uniform at school, but at home we prefer something more <strong>comfortable</strong>.", word: "comfortable", nl: "gemakkelijk / comfortabel" },
-            { sentence: "My brother made a silly <strong>comment</strong> about what I was wearing.", word: "comment", nl: "commentaar / opmerking" },
-            { sentence: "My aunts always <strong>dress</strong> well. They look really good.", word: "dress", nl: "zich (aan)kleden" },
-            { sentence: "That new dress you are wearing is <strong>gorgeous</strong>!", word: "gorgeous", nl: "schitterend / prachtig" },
-            { sentence: "Can you <strong>imagine</strong> Dad in a men's skirt? It would look silly on him!", word: "imagine", nl: "zich voorstellen" },
-            { sentence: "Have you seen Emma Watson's <strong>latest</strong> film? I think it came out only last week.", word: "latest", nl: "nieuwst(e)" },
-            { sentence: "Natalya is vegan, so she doesn't wear <strong>leather</strong> shoes or clothes.", word: "leather", nl: "leer / van leer" },
-            { sentence: "Don't kick that poor cat! That's so <strong>nasty</strong>!", word: "nasty", nl: "gemeen / naar" },
-            { sentence: "Wren's parents <strong>own</strong> at least four houses.", word: "own", nl: "bezitten" },
-            { sentence: "What's the <strong>password</strong> for the Wi-Fi network?", word: "password", nl: "wachtwoord" },
-            { sentence: "Larry doesn't have a wallet. He just keeps his money in his <strong>pocket</strong>.", word: "pocket", nl: "zak" },
-            { sentence: "Brenda is pretty, smart and nice. No wonder she's so <strong>popular</strong>.", word: "popular", nl: "populair" },
-            { sentence: "Is that ring <strong>real</strong> gold? It must have been really expensive.", word: "real", nl: "echt" },
-            { sentence: "Please <strong>reply</strong> to this message as soon as you can.", word: "reply", nl: "antwoorden" },
-            { sentence: "If you want to go inside the building, you have to <strong>sign in</strong>.", word: "sign in", nl: "intekenen / zich aanmelden" },
-            { sentence: "So you accidentally put your mobile in the fridge? That's very <strong>silly</strong> of you.", word: "silly", nl: "dwaas / onnozel" },
-            { sentence: "Girls can wear a <strong>skirt</strong> or a pair of trousers as part of their school uniform.", word: "skirt", nl: "rok" },
-            { sentence: "As a young child, Verushka was chubby, but now she's really <strong>slim</strong>.", word: "slim", nl: "slank" },
-            { sentence: "Frank always wears a T-shirt <strong>underneath</strong> his button-up shirt.", word: "underneath", nl: "(er)onder" },
+      { nl: "Laten we afspreken voor een drankje in The Cube Café.", en: "Let's meet in The Cube Café for a drink." },
+      { nl: "Oké, dan zie ik je om drie uur!", en: "OK, see you at three o'clock!" },
+      { nl: "Kunnen we ergens afspreken?", en: "Can we meet somewhere?" },
+      { nl: "Ik zou met je mee kunnen gaan.", en: "I could come with you." },
+      { nl: "Zou je het leuk vinden om mee te gaan?", en: "Would you like to come along?" },
 
-            { sentence: "A <strong>blouse</strong> is a lot fancier than a T-shirt.", word: "blouse", nl: "bloes" },
-            { sentence: "I love your hat! Can I <strong>borrow</strong> it sometime?", word: "borrow", nl: "lenen" },
-            { sentence: "Carrie lost her gold <strong>earring</strong> and I was the one who found it!", word: "earring", nl: "oorbel" },
-            { sentence: "I'm sure skinny jeans are very <strong>fashionable</strong>, but they just don't look good on me.", word: "fashionable", nl: "modieus" },
-            { sentence: "What's taking you so long? – Come on, we need to <strong>get ready</strong> for the party.", word: "get ready", nl: "zich klaarmaken" },
-            { sentence: "My mum wears a lot of <strong>jewellery</strong>: earrings, necklaces, bracelets ...", word: "jewellery", nl: "sieraden" },
-            { sentence: "Oh, your nails look lovely with that pink <strong>nail varnish</strong> on them.", word: "nail varnish", nl: "nagellak" },
-            { sentence: "Walk <strong>past</strong> the bus station and then turn left.", word: "past", nl: "langs / voorbij" },
-            { sentence: "My friend is very <strong>pretty</strong>, so everything looks good on her.", word: "pretty", nl: "mooi" },
-            { sentence: "I didn't hear you properly. Can you <strong>repeat</strong> what you just said?", word: "repeat", nl: "herhalen" },
-            { sentence: "In the summer, <strong>shorts</strong> are more comfortable than full-length trousers.", word: "shorts", nl: "korte broek(en)" },
-            { sentence: "I like your shoes. They <strong>suit</strong> you very well.", word: "suit", nl: "passen bij / goed staan" },
-            { sentence: "When you're finished painting that <strong>toenail</strong>, let it dry for a while.", word: "toenail", nl: "teennagel" },
-            { sentence: "OK, I've got shoes, I've got a skirt. Now all I need is a <strong>top</strong>.", word: "top", nl: "bovenkleding (shirt, trui etc.)" },
-            { sentence: "Don't go when the <strong>traffic lights</strong> are red.", word: "traffic lights", nl: "verkeerslichten" },
-            { sentence: "Which way do we have to <strong>turn</strong> here? Left or right?", word: "turn", nl: "afslaan" },
-            { sentence: "Can I borrow your <strong>umbrella</strong>? It's raining.", word: "umbrella", nl: "paraplu" },
-            { sentence: "My sister <strong>usually</strong> wears jeans, but for parties she sometimes wears a dress.", word: "usually", nl: "gewoonlijk" },
-            { sentence: "Don't buy another dress! Your <strong>wardrobe</strong> is so full already.", word: "wardrobe", nl: "kledingkast / garderobe" },
-            { sentence: "You're not going to <strong>wear</strong> shorts to the wedding, are you?", word: "wear", nl: "dragen / aantrekken" },
+      { nl: "Zou je me de weg kunnen wijzen?", en: "Could you give me directions?" },
+      { nl: "Pardon, zou u mij de weg kunnen wijzen naar de Jubilee Hall?", en: "Excuse me, could you tell me the way to the Jubilee Hall?" },
+      { nl: "Ik zal het je laten zien op de plattegrond.", en: "Let me show you on the floor plan." },
+      { nl: "Kijk, we zijn hier, bij deze ingang.", en: "Look, we are by this entrance, here." },
+      { nl: "Het restaurant is aan het einde van de winkelgalerij aan de linkerkant.", en: "The restaurant is at the end of the arcade to the left." },
+      { nl: "Blijf hier gewoon rechtdoor gaan.", en: "Just keep going along here." },
 
-            { sentence: "We took a walk <strong>along</strong> the river.", word: "along", nl: "langs / voorbij" },
-            { sentence: "Was that top really only £5? What a <strong>bargain</strong>!", word: "bargain", nl: "koopje" },
-            { sentence: "If my brother's hair looks a mess, he puts on a <strong>cap</strong>.", word: "cap", nl: "pet" },
-            { sentence: "Here's your <strong>change</strong> and your receipt.", word: "change", nl: "wisselgeld" },
-            { sentence: "How much does this jacket <strong>cost</strong>? – It's £40.", word: "cost", nl: "kosten" },
-            { sentence: "You buy a lot at that store, don't you? You must be their best <strong>customer</strong>.", word: "customer", nl: "klant" },
-            { sentence: "He did not know where the restaurant was, so he had to ask for <strong>directions</strong>.", word: "directions", nl: "routebeschrijving / richtingaanwijzingen" },
-            { sentence: "These shoes don't <strong>fit</strong>. Have you got them in a larger size?", word: "fit", nl: "passen / de juiste maat hebben" },
-            { sentence: "Your brother is very <strong>good-looking</strong>. Has he got a girlfriend?", word: "good-looking", nl: "knap" },
-            { sentence: "I don't care if Pete is your friend, I just don't like that <strong>guy</strong>.", word: "guy", nl: "kerel / vent" },
-            { sentence: "My mum knitted a <strong>jumper</strong> for me, but I prefer blouses.", word: "jumper", nl: "trui" },
-            { sentence: "The <strong>nearest</strong> shopping centre is two kilometres from here.", word: "nearest", nl: "dichtstbijzijnde" },
-            { sentence: "I don't have a bank card. Can I <strong>pay cash</strong>?", word: "pay cash", nl: "contant betalen" },
-            { sentence: "We don't really like green trousers. We <strong>prefer</strong> blue ones.", word: "prefer", nl: "liever hebben / verkiezen" },
-            { sentence: "How much is that top? – I don't know, but let me check the <strong>price tag</strong>.", word: "price tag", nl: "prijskaartje" },
-            { sentence: "If you want to exchange an item of clothing, you need a <strong>receipt</strong>.", word: "receipt", nl: "bonnetje" },
-            { sentence: "I've got a question about these trousers. Is there a <strong>sales assistant</strong> nearby?", word: "sales assistant", nl: "verkoper" },
-            { sentence: "This coat is too big for me. It's not my <strong>size</strong>.", word: "size", nl: "maat" },
-            { sentence: "Usually these shoes are £50, but now they're on <strong>special offer</strong>: only £25!", word: "special offer", nl: "speciale aanbieding" },
-            { sentence: "The detective pointed to a <strong>spot</strong> of blood on the floor.", word: "spot", nl: "stip / puist" },
-            { sentence: "My new T-shirt has a large blue <strong>stripe</strong> on the front.", word: "stripe", nl: "streep" },
-            { sentence: "The sun is really bright. I'm going to put on my <strong>sunglasses</strong>.", word: "sunglasses", nl: "zonnebril" },
-            { sentence: "That cake was so old and hard, I broke my <strong>tooth</strong> on it.", word: "tooth", nl: "tand" },
-            { sentence: "The new girl in town is a little <strong>weird</strong>. She wears funny clothes.", word: "weird", nl: "vreemd / raar" },
+      { nl: "Laten we de ... proberen.", en: "Let's try the ..." },
+      { nl: "Wat dacht je van dit / dat idee?", en: "How's this / that for an idea?" },
+      { nl: "Ik heb een idee!", en: "I've got an idea!" },
+      { nl: "Hoe zou je het vinden om ... ?", en: "How do you fancy ... ?" },
+      { nl: "Wat dacht je van ... ?", en: "How about ... ?" },
+      { nl: "Waarom gaan we niet met z'n allen ... ?", en: "Why don't we all ... ?" },
+      { nl: "Willen jullie allebei ... ?", en: "Do you both want to ... ?" },
 
-            { sentence: "<strong>Add</strong> some salt to the sauce to give it more taste.", word: "add", nl: "toevoegen" },
-            { sentence: "My dad is such a bad cook, he can't even <strong>boil</strong> water.", word: "boil", nl: "koken" },
-            { sentence: "Our meal was delicious. The <strong>chef</strong> did a great job.", word: "chef", nl: "chef-kok" },
-            { sentence: "Do you know how to crack open the hard shell of a <strong>coconut</strong>?", word: "coconut", nl: "kokosnoot" },
-            { sentence: "Tomorrow it's going to be cold and snow will <strong>cover</strong> the mountain tops.", word: "cover", nl: "bedekken" },
-            { sentence: "Strawberries taste best with a big portion of <strong>cream</strong> on top.", word: "cream", nl: "(slag)room" },
-            { sentence: "Freshly baked bread has a lovely, <strong>crunchy</strong> crust.", word: "crunchy", nl: "knapperig" },
-            { sentence: "Let's <strong>decorate</strong> Lily's birthday cake with candy flowers.", word: "decorate", nl: "versieren" },
-            { sentence: "This soup is <strong>delicious</strong>. Can I have some more?", word: "delicious", nl: "heerlijk" },
-            { sentence: "My mum prepared a delicious <strong>dish</strong> this evening.", word: "dish", nl: "gerecht" },
-            { sentence: "Be careful with that glass. Don't <strong>drop</strong> it, or it will break!", word: "drop", nl: "laten vallen" },
-            { sentence: "My brother only likes potatoes <strong>fried</strong> in butter.", word: "fried", nl: "gebakken" },
-            { sentence: "If you follow the <strong>recipe</strong> for this dessert, you can't go wrong.", word: "recipe", nl: "recept" },
-            { sentence: "Christa doesn't like <strong>salad</strong>. She says it's rabbit food.", word: "salad", nl: "salade" },
-            { sentence: "<strong>Salmon</strong> is a large fish with pink meat.", word: "salmon", nl: "zalm" },
-            { sentence: "Honey is sweet, cheese is <strong>savoury</strong>.", word: "savoury", nl: "hartig" },
-            { sentence: "At this shop we <strong>sell</strong> very healthy drinks and smoothies.", word: "sell", nl: "verkopen" },
-            { sentence: "I always <strong>serve</strong> my spaghetti bolognese with bread.", word: "serve", nl: "serveren / opdienen" },
-            { sentence: "Indian food can be very hot and <strong>spicy</strong>.", word: "spicy", nl: "kruidig / pikant" },
-            { sentence: "There was a lovely new fruit <strong>stall</strong> on the market today.", word: "stall", nl: "(markt)kraam" },
-            { sentence: "That smells so good. Can I <strong>taste</strong> it?", word: "taste", nl: "proeven" },
-            { sentence: "I love Italian food. It's very <strong>tasty</strong>.", word: "tasty", nl: "smakelijk" },
+      { nl: "Hoe krijgen we Joe hier?", en: "How are we going to get Joe there?" },
+      { nl: "Laten we daar afspreken om ...", en: "Let's meet there at ..." },
+      { nl: "Zeg tegen Joe dat hij ...", en: "Tell Joe to ..." },
+      { nl: "Kom om zeven uur.", en: "Come at 7 pm." },
 
-            { sentence: "This is not a very pretty restaurant, but it has got a great <strong>atmosphere</strong>.", word: "atmosphere", nl: "sfeer" },
-            { sentence: "George, can you <strong>book</strong> a table for two at Luigi's for Saturday night?", word: "book", nl: "reserveren / bestellen" },
-            { sentence: "Dutch people like <strong>chips</strong> with mayonnaise. Brits eat them with salt and vinegar.", word: "chips", nl: "friet(jes)" },
-            { sentence: "Would anyone like some <strong>dessert</strong>? Yoghurt or fruit, maybe?", word: "dessert", nl: "toetje / nagerecht" },
-            { sentence: "I don't feel like cooking. Let's <strong>eat out</strong> tonight.", word: "eat out", nl: "uit eten gaan" },
-            { sentence: "Do you <strong>fancy</strong> having some Mexican food? It's nice and spicy.", word: "fancy", nl: "leuk vinden / zin hebben in" },
-            { sentence: "This café is good and cheap. It offers very <strong>good value</strong>.", word: "good value", nl: "waar voor je geld" },
-            { sentence: "That's a <strong>huge</strong> sandwich. Way too much for me.", word: "huge", nl: "enorm / reusachtig" },
-            { sentence: "I don't like pizza, so I had some lasagne <strong>instead</strong>.", word: "instead", nl: "in plaats (daar)van" },
-            { sentence: "Sophie was not that hungry, so she ordered only a <strong>main course</strong>.", word: "main course", nl: "hoofdgerecht" },
-            { sentence: "You should never skip a <strong>meal</strong>, it's bad for your health.", word: "meal", nl: "maaltijd" },
-            { sentence: "Don't <strong>mention</strong> this to Anne. It's a surprise.", word: "mention", nl: "zeggen / noemen" },
-            { sentence: "That's not one <strong>portion</strong>, it is enough food for three or four people.", word: "portion", nl: "portie" },
-            { sentence: "Finn couldn't afford the coat he liked, because it was too <strong>pricey</strong>.", word: "pricey", nl: "prijzig" },
-            { sentence: "Restaurants often offer salad, potatoes or vegetables as a <strong>side dish</strong>.", word: "side dish", nl: "bijgerecht" },
-            { sentence: "Before the main course, you can have a <strong>starter</strong>.", word: "starter", nl: "voorgerecht" },
-            { sentence: "I wasn't expecting you. What a <strong>surprise</strong>!", word: "surprise", nl: "verrassing" },
-            { sentence: "You can eat at home, eat out or get a <strong>takeaway</strong>.", word: "takeaway", nl: "afhaalmaaltijd" },
-            { sentence: "I'd like to <strong>take</strong> you <strong>out</strong> to a fancy restaurant for your birthday.", word: "take out", nl: "iemand mee uit nemen" },
-            { sentence: "The <strong>waiter</strong> will bring you your food in a moment.", word: "waiter", nl: "ober" },
+      { nl: "Ik zou je niet kunnen vertellen of het een duur restaurant is.", en: "I couldn't tell you if it's an expensive restaurant." },
+      { nl: "We zouden in plaats daarvan de Noodle Bar kunnen proberen!", en: "We could try the Noodle Bar instead!" },
+      { nl: "We kunnen met z'n allen Happy Birthday voor hem zingen!", en: "We can all sing Happy Birthday to him!" },
+      { nl: "Ik kan niet te veel mensen uitnodigen - ik heb een beperkt budget.", en: "I can't invite too many people – I'm on a budget." },
+      { nl: "Moet ik een tafel reserveren?", en: "Should I book a table?" },
+      { nl: "We moeten hem er niets over vertellen.", en: "We shouldn't tell him about it." },
+      { nl: "Ik denk dat we hem mee moeten nemen naar ...", en: "I think we should take him to ..." },
+      { nl: "Hoeveel vrienden zullen we uitnodigen?", en: "How many friends should we invite?" },
+      { nl: "We moeten eigenlijk Aryan vragen of hij ook wil komen ...", en: "We should ask Aryan if he wants to come, too ..." },
+      { nl: "Ik zou dit eigenlijk niet moeten zeggen, maar ...", en: "I shouldn't say this, but ..." },
 
-            { sentence: "We only have a small <strong>amount</strong> of cheese left.", word: "amount", nl: "hoeveelheid" },
-            { sentence: "We're selling cakes, and the money isn't for us, but for a good <strong>cause</strong>.", word: "cause", nl: "(goed) doel" },
-            { sentence: "Lots of people give money to a <strong>charity</strong> like Oxfam or War Child.", word: "charity", nl: "liefdadigheid" },
-            { sentence: "You need to <strong>chew</strong> your food well, or you will get a stomach ache.", word: "chew", nl: "kauwen" },
-            { sentence: "My friends and I love to eat <strong>crisps</strong> and watch TV.", word: "crisps", nl: "chips" },
-            { sentence: "During Ramadan, many Muslims <strong>fast</strong> while the sun is up.", word: "fast", nl: "vasten" },
-            { sentence: "My grandad is very <strong>generous</strong>. He always gives us lots of presents.", word: "generous", nl: "gul / vrijgevig" },
-            { sentence: "You can put an <strong>ice cube</strong> in your drink to make it colder.", word: "ice cube", nl: "ijsklontje" },
-            { sentence: "You sit on a chair and you <strong>lie</strong> in bed.", word: "lie", nl: "liggen" },
-            { sentence: "Water is a <strong>liquid</strong>. So is milk.", word: "liquid", nl: "vloeistof" },
-            { sentence: "Do you drink tea from a glass or from a <strong>mug</strong>?", word: "mug", nl: "beker / mok" },
-            { sentence: "<strong>Normally</strong> Susie goes home after school, but not today.", word: "normally", nl: "gewoonlijk" },
-            { sentence: "We <strong>plan</strong> to go to Spain this year.", word: "plan", nl: "van plan zijn" },
-            { sentence: "I won't tell anyone, I <strong>promise</strong>.", word: "promise", nl: "beloven" },
-            { sentence: "We want to <strong>provide</strong> kids in Africa <strong>with</strong> new shoes.", word: "provide with", nl: "voorzien van" },
-            { sentence: "Simon is trying to <strong>raise money</strong> to start a school in Liberia.", word: "raise money", nl: "geld inzamelen" },
-            { sentence: "Could you pass me a <strong>slice</strong> of bread, please?", word: "slice", nl: "plak(je) / snee(tje)" },
-            { sentence: "When you don't get enough to eat, you <strong>starve</strong>.", word: "starve", nl: "honger lijden / verhongeren" },
-            { sentence: "My parents bought a <strong>sofa</strong> that is big enough for all of us to sit on.", word: "sofa", nl: "bank" },
-            { sentence: "When your throat hurts, it sometimes helps to <strong>suck</strong> on an ice cube.", word: "suck", nl: "zuigen" },
+      { nl: "Bekijk het menu eens.", en: "Have a look at the menu." },
+      { nl: "Bestel voor mij maar een ..., alsjeblieft.", en: "Order a ... for me, please." },
+      { nl: "Ga zitten! / Neem plaats!", en: "Take a seat!" },
 
-            { sentence: "Do you want me to <strong>bake</strong> a cake for your birthday?", word: "bake", nl: "bakken" },
-            { sentence: "Use a knife to <strong>chop</strong> an onion into small cubes.", word: "chop", nl: "(fijn)hakken / (fijn)snijden" },
-            { sentence: "Are you going to come with us? You've got to <strong>decide</strong> now.", word: "decide", nl: "beslissen" },
-            { sentence: "Do we have to pay extra for <strong>delivery</strong> of the pizzas?", word: "delivery", nl: "bezorging" },
-            { sentence: "Keep the milk in the <strong>fridge</strong>, or it will go bad.", word: "fridge", nl: "koelkast" },
-            { sentence: "<strong>Fry</strong> the steak in some butter.", word: "fry", nl: "bakken / frituren" },
-            { sentence: "Fry the onions in a <strong>frying pan</strong>.", word: "frying pan", nl: "koekenpan" },
-            { sentence: "I fancy a hot chocolate. Could you <strong>heat</strong> some milk for me?", word: "heat", nl: "verhitten / warm maken" },
-            { sentence: "My mum is a big fan of <strong>home-made</strong> meals – she cooks every evening.", word: "home-made", nl: "zelfgemaakt / huisgemaakt" },
-            { sentence: "First, you chop the onions. <strong>Next</strong>, you fry them.", word: "next", nl: "daarna" },
-            { sentence: "Can I <strong>order</strong> a hamburger and some fries, please?", word: "order", nl: "bestellen" },
-            { sentence: "We need a <strong>packet</strong> of butter for the cake.", word: "packet", nl: "pak(je)" },
-            { sentence: "<strong>Pork</strong> is meat from pigs.", word: "pork", nl: "varkensvlees" },
-            { sentence: "The coffee is ready. Can you <strong>pour</strong> a cup for your uncle?", word: "pour", nl: "gieten / (in)schenken" },
-            { sentence: "When my dad doesn't have time to cook, we have a <strong>ready-made</strong> meal.", word: "ready-made", nl: "kant-en-klaar" },
-            { sentence: "Sushi is made of seaweed and <strong>rice</strong>. Sometimes there is fish in it, too.", word: "rice", nl: "rijst" },
-            { sentence: "A <strong>saucepan</strong> is a small, deep pan with a long handle.", word: "saucepan", nl: "steelpan" },
-            { sentence: "There's bread in the oven. Doesn't it <strong>smell</strong> lovely?", word: "smell", nl: "ruiken" },
-            { sentence: "Bananas are sweet, lemons are <strong>sour</strong>.", word: "sour", nl: "zuur" },
-            { sentence: "Sir, would you like your <strong>steak</strong> medium or well-done?", word: "steak", nl: "biefstuk" },
-            { sentence: "I want to <strong>try</strong> some Chinese food for a change.", word: "try", nl: "proberen" },
-            { sentence: "Look at all those dirty plates! Why didn't you do the <strong>washing-up</strong>?", word: "washing-up", nl: "afwas" }
-        ];
+      { nl: "Luister!", en: "Listen!" },
+      { nl: "Pardon, ...", en: "Excuse me, ..." },
 
-        let difficultWords = [];
-        let currentList = [...allWords];
-        let idx = 0;
-        let wordMode = false;
-        let filterOn = false;
-        let sortMode = 'std';
+      { nl: "Kan ik je / u helpen?", en: "Can I help you?" },
+      { nl: "Ik zou graag een ... willen.", en: "I'd like a ... please." },
+      { nl: "Wil(t) je / u daar (een) ... bij?", en: "Would you like a ... with that?" },
+      { nl: "Was dat alles? / Anders nog iets?", en: "Will that be all?" },
+      { nl: "Dat is alles. / Dat was het, bedankt.", en: "That's all, thanks." },
+      { nl: "Hoeveel is het, alles bij elkaar?", en: "How much does that come to?" },
 
-        const card = document.getElementById('card-element');
-        const textFront = document.getElementById('text-front');
-        const textBack = document.getElementById('text-back');
-        const prog = document.getElementById('progress');
+      { nl: "Wat moeten we doen?", en: "What do we need to do?" },
+      { nl: "Eerst snijd je de kip en de groenten.", en: "First, you chop the chicken and the vegetables." },
+      { nl: "Daarna bak je de kip, voeg de groenten toe.", en: "Next, you fry the chicken, add the vegetables." },
+      { nl: "Dan giet je de sojasaus erbij.", en: "Then pour in the soy sauce." },
+      { nl: "Hoe kook je rijst?", en: "How do you cook rice?" },
+      { nl: "Zodra het water kookt, voeg je de rijst toe.", en: "When the water is boiling, add the rice." }
+    ];
 
-        function load() {
-            const saved = JSON.parse(localStorage.getItem('eng_zinnen_u45') || '{}');
-            if (saved.diffIndices) difficultWords = saved.diffIndices.map(i => allWords[i]).filter(Boolean);
-            if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, Math.max(currentList.length - 1, 0));
-            if (saved.wordMode !== undefined) wordMode = !!saved.wordMode;
-        }
+    let difficultPhrases = [];
+    let currentList = [...allPhrases];
+    let idx = 0;
+    let isEnToNl = false;
+    let filterOn = false;
+    let sortMode = 'std';
 
-        function save() {
-            localStorage.setItem('eng_zinnen_u45', JSON.stringify({
-                diffIndices: difficultWords.map(w => allWords.indexOf(w)),
-                lastIdx: idx,
-                wordMode
-            }));
-        }
+    const card = document.getElementById('card-element');
+    const textFront = document.getElementById('text-front');
+    const textBack = document.getElementById('text-back');
+    const prog = document.getElementById('progress');
 
-        function update() {
-            if (!currentList.length) return;
-            card.classList.remove('is-flipped');
-            const item = currentList[idx];
-            if (wordMode) {
-                textFront.innerHTML = `<strong>${item.word}</strong>`;
-                textBack.innerHTML = `<div class="back-nl">${item.nl}</div><div style="margin-top:12px;font-size:0.95rem;opacity:.8;line-height:1.45;">${item.sentence}</div>`;
-                document.getElementById('label-front').textContent = 'Engels woord';
-                document.getElementById('label-back').textContent = 'Betekenis + zin';
-            } else {
-                textFront.innerHTML = item.sentence;
-                textBack.innerHTML = `<div class="back-word">${item.word}</div><div class="back-nl">${item.nl}</div>`;
-                document.getElementById('label-front').textContent = 'Engelse zin';
-                document.getElementById('label-back').textContent = 'Woord + betekenis';
-            }
-            prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
-            card.classList.toggle('is-marked', difficultWords.includes(item));
-            document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultWords.length})`;
-            document.getElementById('lang-btn').textContent = wordMode ? '🔄 Woord ➔ Zin' : '🔄 Zin ➔ Woord';
-            save();
-        }
+    function load() {
+      const saved = JSON.parse(localStorage.getItem('eng_phrases_u45_v1') || '{}');
+      if (saved.diffIndices) difficultPhrases = saved.diffIndices.map(i => allPhrases[i]).filter(Boolean);
+      if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, currentList.length - 1);
+      if (saved.isEnToNl !== undefined) isEnToNl = saved.isEnToNl;
+    }
 
-        function flip() { card.classList.toggle('is-flipped'); }
-        function next() { idx = (idx + 1) % currentList.length; update(); }
-        function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
-        function shuffle() { currentList = [...currentList].sort(() => Math.random() - 0.5); idx = 0; update(); }
-        function toggleMode() { wordMode = !wordMode; update(); }
-        function mark() {
-            const item = currentList[idx];
-            if (!difficultWords.includes(item)) difficultWords.push(item);
-            else difficultWords = difficultWords.filter(w => w !== item);
+    function save() {
+      localStorage.setItem('eng_phrases_u45_v1', JSON.stringify({
+        diffIndices: difficultPhrases.map(w => allPhrases.indexOf(w)),
+        lastIdx: idx,
+        isEnToNl
+      }));
+    }
+
+    function update() {
+      if (!currentList.length) return;
+      card.classList.remove('is-flipped');
+      const item = currentList[idx];
+      if (isEnToNl) {
+        textFront.textContent = item.en;
+        textBack.textContent = item.nl;
+        document.getElementById('label-front').textContent = 'Engels';
+        document.getElementById('label-back').textContent = 'Nederlands';
+        document.getElementById('lang-btn').textContent = '🔄 NL ➔ EN';
+      } else {
+        textFront.textContent = item.nl;
+        textBack.textContent = item.en;
+        document.getElementById('label-front').textContent = 'Nederlands';
+        document.getElementById('label-back').textContent = 'Engels';
+        document.getElementById('lang-btn').textContent = '🔄 EN ➔ NL';
+      }
+      prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+      card.classList.toggle('is-marked', difficultPhrases.includes(item));
+      document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultPhrases.length})`;
+      save();
+    }
+
+    function flip() { card.classList.toggle('is-flipped'); }
+    function next() { idx = (idx + 1) % currentList.length; update(); }
+    function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+    function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+    function toggleLang() { isEnToNl = !isEnToNl; update(); }
+    function mark() {
+      const item = currentList[idx];
+      if (!difficultPhrases.includes(item)) difficultPhrases.push(item);
+      else difficultPhrases = difficultPhrases.filter(w => w !== item);
+      update();
+    }
+    function toggleFilter() {
+      filterOn = !filterOn;
+      currentList = filterOn ? [...difficultPhrases] : [...allPhrases];
+      if (currentList.length === 0 && filterOn) {
+        alert('Geen moeilijke zinnen!');
+        filterOn = false;
+        currentList = [...allPhrases];
+      }
+      idx = 0;
+      update();
+    }
+    function speak() {
+      const item = currentList[idx];
+      const utterance = new SpeechSynthesisUtterance(item.en);
+      utterance.lang = 'en-GB';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
+    function closeList() { document.getElementById('list-modal').style.display = 'none'; }
+    function setSort(m) {
+      sortMode = m;
+      document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
+      document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
+      renderList();
+    }
+
+    function renderList() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const container = document.getElementById('list-container');
+      container.innerHTML = '';
+      let list = allPhrases.map((w, i) => ({ ...w, origIdx: i }));
+      if (sortMode === 'diff') {
+        list.sort((a, b) => difficultPhrases.includes(allPhrases[b.origIdx]) - difficultPhrases.includes(allPhrases[a.origIdx]));
+      }
+      list.forEach(w => {
+        if (w.nl.toLowerCase().includes(q) || w.en.toLowerCase().includes(q)) {
+          const div = document.createElement('div');
+          div.className = 'word-item';
+          div.innerHTML = `<div><div class="nl">${w.nl}</div><div class="en">${w.en}</div></div><span>${difficultPhrases.includes(allPhrases[w.origIdx]) ? '★' : ''}</span>`;
+          div.onclick = () => {
+            filterOn = false;
+            currentList = [...allPhrases];
+            idx = w.origIdx;
             update();
+            closeList();
+          };
+          container.appendChild(div);
         }
-        function toggleFilter() {
-            filterOn = !filterOn;
-            currentList = filterOn ? [...difficultWords] : [...allWords];
-            if (currentList.length === 0 && filterOn) {
-                alert('Geen moeilijke woorden!');
-                filterOn = false;
-                currentList = [...allWords];
-            }
-            idx = 0;
-            update();
-        }
-        function speak() {
-            const item = currentList[idx];
-            const text = wordMode ? item.word : item.sentence.replace(/<[^>]*>/g, '');
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-GB';
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-        }
+      });
+    }
 
-        function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
-        function closeList() { document.getElementById('list-modal').style.display = 'none'; }
-        function setSort(m) {
-            sortMode = m;
-            document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
-            document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
-            renderList();
-        }
+    function resetProgress() {
+      if (confirm('Wis voortgang?')) {
+        localStorage.removeItem('eng_phrases_u45_v1');
+        location.reload();
+      }
+    }
 
-        function renderList() {
-            const q = document.getElementById('search-input').value.toLowerCase();
-            const container = document.getElementById('list-container');
-            container.innerHTML = '';
-            let list = allWords.map((w, i) => ({ ...w, origIdx: i }));
-            if (sortMode === 'diff') {
-                list.sort((a, b) => difficultWords.includes(allWords[b.origIdx]) - difficultWords.includes(allWords[a.origIdx]));
-            }
-
-            list.forEach(w => {
-                const haystack = `${w.word} ${w.nl} ${w.sentence.replace(/<[^>]*>/g, '')}`.toLowerCase();
-                if (haystack.includes(q)) {
-                    const div = document.createElement('div');
-                    div.className = 'word-item';
-                    div.innerHTML = `
-                        <div>
-                            <span class="en">${w.word}</span><br>
-                            <span class="nl">${w.nl}</span>
-                            <div class="ex">${w.sentence}</div>
-                        </div>
-                        <span>${difficultWords.includes(allWords[w.origIdx]) ? '★' : ''}</span>`;
-                    div.onclick = () => {
-                        filterOn = false;
-                        currentList = [...allWords];
-                        idx = w.origIdx;
-                        update();
-                        closeList();
-                    };
-                    container.appendChild(div);
-                }
-            });
-        }
-
-        function resetProgress() {
-            if (confirm('Wis voortgang?')) {
-                localStorage.removeItem('eng_zinnen_u45');
-                location.reload();
-            }
-        }
-
-        load();
-        update();
-    </script>
+    load();
+    update();
+  </script>
 </body>
 </html>

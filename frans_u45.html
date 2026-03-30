@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Frans Master U45 - CSV Import</title>
+    <style>
+        :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        
+        /* Flitskaart */
+        .scene { width: 100%; max-width: 380px; height: 260px; perspective: 1000px; margin: 20px 0; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; }
+        .card-front { color: var(--primary); font-size: 1.6rem; font-weight: 800; }
+        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); font-size: 1.4rem; }
+        
+        .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.5; letter-spacing: 1px; }
+        .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+        .is-marked .star { display: block; }
+        .is-marked .card-face { border: 3px solid var(--orange); }
+        
+        .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
+        /* Knoppen */
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+        button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+        .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+        .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+        .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+        
+        /* Lijst weergave */
+        #list-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; }
+        .word-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .word-item .fr { font-weight: bold; }
+        .word-item .nl { color: #666; }
+        .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+        .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
+        .sort-bar button.active { background: var(--primary); color: white; }
+        .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+        .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+    </style>
+</head>
+<body>
+
+    <h3 style="color: var(--primary); margin-top: 10px;">Unité 4 & 5</h3>
+
+    <div class="scene" onclick="flip()">
+        <div class="card" id="card-element">
+            <div class="card-face card-front">
+                <div class="star">★</div>
+                <div class="label" id="label-front">Frans</div>
+                <div id="text-front">...</div>
+                <button class="speak-btn" id="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
+            </div>
+            <div class="card-face card-back">
+                <div class="label" id="label-back">Nederlands</div>
+                <div id="text-back">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prev()">⬅️ Vorige</button>
+        <button onclick="next()">Volgende ➡️</button>
+        <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+        <button onclick="shuffle()">🔀 Husselen</button>
+        <button id="lang-btn" onclick="toggleLang()">🔄 NL ➔ FR</button>
+        <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+        <button class="btn-blue" onclick="openList()">📋 Woordenlijst & Zoeken</button>
+        <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+    </div>
+
+    <div class="progress" id="progress">Kaart 1 van ...</div>
+
+    <div id="list-modal">
+        <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+            <input type="text" class="search-box" id="search-input" placeholder="Zoek woord..." oninput="renderList()">
+            <div class="sort-bar">
+                <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+                <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+            </div>
+        </div>
+        <div id="list-container"></div>
+        <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+    </div>
+
+    <script>
+        // --- PLAK HIERONDER JE EXCEL DATA (CSV-formaat: Frans,Nederlands) ---
+        const csvData = `le garage,de garage
+l'entrée (f),de ingang
+la porte (f),de deur
+l'escalier (m),de trap
+l'ascenseur (m),de lift
+l'étage (m),de verdieping
+le meuble,het meubelstuk
+la pièce,de kamer, het vertrek
+la chambre,de slaapkamer
+la cuisine,de keuken
+la salle de bains,de badkamer
+la salle de séjour,de woonkamer
+la fenêtre,het raam
+l'armoire (f),de kast
+les toilettes (f pl),het toilet
+la chaise,de stoel
+la table,de tafel
+le lit,het bed
+le bâtiment,het gebouw
+le toit,het dak
+la ferme,de boerderij
+le parking,de parkeerplaats
+vivre,wonen/leven
+monter,naar boven gaan
+descendre,naar beneden gaan
+le centre-ville,het stadscentrum
+l'immeuble (m),het flatgebouw
+la station de métro,het metrostation
+le magasin,de winkel
+faire du vélo,fietsen
+la plage,het strand
+la voiture,de auto
+la circulation,het verkeer
+ouvert (ouvrir),open/geopend (openen)
+l'arrêt de bus (m),de bushalte
+au-dessus,boven
+la chose,het ding
+il faut,je moet/het is nodig
+dangereux/dangereuse,gevaarlijk
+faire du surf,surfen
+plus tard,later
+traverser,oversteken
+en face de,tegenover
+l'été (m),de zomer
+je veux (vouloir),ik wil (willen)
+le coin,de hoek
+la campagne,het platteland
+le cinéma,de bioscoop
+le carrefour,het kruispunt
+propre,eigen
+troisième,derde
+bleu,blauw
+la boulangerie,de bakker
+beau/belle,mooi
+continuer,doorgaan
+d'accord,oké
+je prends (prendre),ik neem (nemen)
+déménager,verhuizen
+blanc/blanche,wit
+les feux (m pl),de stoplichten
+à gauche,(naar) links
+à droite,(naar) rechts
+tout droit,rechtdoor
+premier/première,eerste
+bonne chance !,succes!
+jusqu'à,tot aan
+puis,vervolgens 
+après,na
+le rond-point,de rotonde
+exactement,precies
+acheter,kopen
+le désordre,de rommel
+contre,tegen
+la place,de plaats
+moyen/moyenne,gemiddeld
+tu peux (pouvoir),jij kunt (kunnen)
+dommage,jammer
+c'est ça,dat klopt
+le bureau,het bureau
+clair,licht
+la semaine,de week
+prochain,volgend
+pour,om te/voor
+les affaires (f pl),de spullen
+ranger,opruimen
+le mur,de muur
+on met (mettre),men legt/zet (leggen/zetten)
+par terre,op de grond
+la taille,de afmeting/maat
+le canapé,de bank
+les vêtements (m pl),de kleren
+la salle à manger,de eetkamer
+le supermarché,de supermarkt
+malheureusement,jammer genoeg
+la vue,het uitzicht
+calme,rustig
+demain,morgen
+passer,doorbrengen
+le rez-de-chaussée,de begane grond
+le grenier,de zolder
+le four,de oven
+le frigo,de koelkast
+le rêve,de droom
+elle décrit (décrire),zij beschrijft (beschrijven)
+le chat,de kat
+le cheval,het paard
+la pharmacie,de apotheek
+bien sûr,natuurlijk
+au fond,achterin
+le lac,het meer
+le produit,het product
+gagner,winnen
+extraordinaire,fantastisch
+bleu,blauw
+jaune,geel
+vert,groen
+rouge,rood
+orange,oranje
+blanc, blanche,wit
+noir,zwart
+les vêtements (m pl),de kleren
+le jean,de spijkerbroek
+la casquette,de pet
+la robe,de jurk
+la jupe,de rok
+la chemise,het overhemd
+la chaussure,de schoen
+le pull,de trui
+la bottine,het laarsje
+la chaussette,de sok
+le manteau,de jas
+le teeshirt,het T-shirt
+la basket,de sportschoen
+le pantalon,de (nette) broek
+la cravate,de stropdas
+les lunettes (f pl),de bril
+le chapeau,de hoed
+gris,grijs
+le style,de stijl
+la tenue,de outfit
+la femme,de vrouw
+l'homme (m),de man
+porter,dragen
+parfois,soms
+quand,als, wanneer
+la couleur,de kleur
+plutôt,liever, eerder
+changer,veranderen
+confortable,comfortabel
+le talon,de hak
+haut,hoog
+tandis que,terwijl
+le bijou,het sieraad
+la boucle d'oreille,de oorbel
+s'habiller,zich aankleden
+le collier,de ketting
+marron,bruin
+savoir,weten
+on voit (voir),wij zien/men ziet (zien)
+les soldes (m pl),de uitverkoop
+cher/chère,duur
+le site,de website
+tu mets (mettre),jij trekt aan (aantrekken)
+renvoyer,terugsturen
+quelque chose,iets
+le sweat,het sweatshirt
+couter,kosten
+rapide,snel
+le paquet,het pakket
+la veste,het jasje
+choisir,kiezen
+essayer,passen
+commander,bestellen
+vous venez (venir),jullie komen/u komt (komen)
+si,als
+court,kort
+à fleurs,bloemetjes-
+seulement,alleen maar
+gratuit,gratis
+le rayon,de afdeling
+le blouson,het jack
+en ligne,online
+d'occasion,tweedehands-
+moi si,ik wel
+moche,lelijk
+je viens (venir),ik kom (komen)
+déjà,al
+cool,te gek
+en promotion,in de aanbieding
+plus,meer
+vous pouvez (pouvoir),jullie kunnen/u kunt (kunnen)
+aider,helpen
+désirer,wensen
+la pointure,de schoenmaat
+autre,ander
+le modèle,het model
+la qualité,de kwaliteit
+la paire,het paar
+ce/cette/ces,die/deze/dit/dat
+formidable,geweldig
+le vendeur,de verkoper
+vas-y,ga je gang
+regretter,betreuren/jammer vinden
+la cour,het schoolplein
+par exemple,bijvoorbeeld
+trouver,vinden
+la réponse,het antwoord
+violet/violette,paars
+la marque,het merk
+important,belangrijk
+ça me va bien,het staat me goed
+durable,duurzaam
+pauvre,arm
+bon marché,goedkoop
+intéresser,interesseren
+chaque,iedere
+rose,roze
+rayé,gestreept
+l'argent de poche (m),het zakgeld
+coloré,gekleurd
+le mois,de maand
+envoyer,sturen
+les cheveux (m pl),de haren
+différent,verschillend
+réagir,reageren`;
+
+        // Parser voor CSV data
+        const allWords = csvData.trim().split('\n').map(line => {
+            const matches = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+            if (matches && matches.length >= 2) {
+                return { 
+                    fr: matches[0].replace(/"/g, '').trim(), 
+                    nl: matches[1].replace(/"/g, '').trim() 
+                };
+            }
+            const parts = line.split(',');
+            return { fr: parts[0]?.trim(), nl: parts[1]?.trim() };
+        }).filter(w => w.fr && w.nl);
+
+        let difficultWords = [];
+        let currentList = [...allWords];
+        let idx = 0;
+        let isNlToFr = false;
+        let filterOn = false;
+        let sortMode = 'std';
+
+        // Elementen
+        const card = document.getElementById('card-element');
+        const textFront = document.getElementById('text-front');
+        const textBack = document.getElementById('text-back');
+        const prog = document.getElementById('progress');
+
+        function load() {
+            const saved = JSON.parse(localStorage.getItem('frans_v20') || '{}');
+            if (saved.diffIndices) difficultWords = saved.diffIndices.map(i => allWords[i]).filter(Boolean);
+            if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, currentList.length - 1);
+        }
+
+        function save() {
+            localStorage.setItem('frans_v20', JSON.stringify({ diffIndices: difficultWords.map(w => allWords.indexOf(w)), lastIdx: idx }));
+        }
+
+        function update() {
+            card.classList.remove('is-flipped');
+            const item = currentList[idx];
+            if (isNlToFr) {
+                textFront.textContent = item.nl;
+                textBack.textContent = item.fr;
+                document.getElementById('label-front').textContent = "Nederlands";
+                document.getElementById('label-back').textContent = "Frans";
+            } else {
+                textFront.textContent = item.fr;
+                textBack.textContent = item.nl;
+                document.getElementById('label-front').textContent = "Frans";
+                document.getElementById('label-back').textContent = "Nederlands";
+            }
+            prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+            card.classList.toggle('is-marked', difficultWords.includes(item));
+            document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultWords.length})`;
+            save();
+        }
+
+        function flip() { card.classList.toggle('is-flipped'); }
+        function next() { idx = (idx + 1) % currentList.length; update(); }
+        function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+        function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+        function toggleLang() { isNlToFr = !isNlToFr; document.getElementById('lang-btn').textContent = isNlToFr ? "🔄 FR ➔ NL" : "🔄 NL ➔ FR"; update(); }
+        function mark() {
+            const item = currentList[idx];
+            if (!difficultWords.includes(item)) difficultWords.push(item);
+            else difficultWords = difficultWords.filter(w => w !== item);
+            update();
+        }
+        function toggleFilter() {
+            filterOn = !filterOn;
+            currentList = filterOn ? [...difficultWords] : [...allWords];
+            if (currentList.length === 0 && filterOn) { alert("Geen moeilijke woorden!"); filterOn = false; currentList = [...allWords]; }
+            idx = 0; update();
+        }
+        function speak() {
+            const item = currentList[idx];
+            const utterance = new SpeechSynthesisUtterance(item.fr);
+            utterance.lang = 'fr-FR';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Lijst functies
+        function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
+        function closeList() { document.getElementById('list-modal').style.display = 'none'; }
+        function setSort(m) { sortMode = m; document.getElementById('sort-std').className = m==='std'?'active':''; document.getElementById('sort-diff').className = m==='diff'?'active':''; renderList(); }
+        
+        function renderList() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+            let list = allWords.map((w, i) => ({...w, origIdx: i}));
+            if (sortMode === 'diff') list.sort((a,b) => difficultWords.includes(allWords[b.origIdx]) - difficultWords.includes(allWords[a.origIdx]));
+            
+            list.forEach(w => {
+                if (w.fr.toLowerCase().includes(q) || w.nl.toLowerCase().includes(q)) {
+                    const div = document.createElement('div');
+                    div.className = 'word-item';
+                    div.innerHTML = `<div><span class="fr">${w.fr}</span><br><span class="nl">${w.nl}</span></div><span>${difficultWords.includes(allWords[w.origIdx])?'★':''}</span>`;
+                    div.onclick = () => { filterOn = false; currentList = [...allWords]; idx = w.origIdx; update(); closeList(); };
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function resetProgress() { if(confirm("Wis voortgang?")) { localStorage.removeItem('frans_v20'); location.reload(); } }
+
+        load(); update();
+    </script>
+</body>
+</html>

@@ -1,55 +1,97 @@
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Engels Phrases U4-5</title>
-  <style>
-    :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-    .scene { width: 100%; max-width: 420px; height: 300px; perspective: 1000px; margin: 20px 0; }
-    .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
-    .card.is-flipped { transform: rotateY(180deg); }
-    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; overflow-wrap: break-word; }
-    .card-front { color: var(--primary); }
-    .card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
-    .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.55; letter-spacing: 1px; }
-    .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
-    .is-marked .star { display: block; }
-    .is-marked .card-face { border: 3px solid var(--orange); }
-    .phrase { font-size: 1.55rem; line-height: 1.45; font-weight: 600; }
-    .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
-    button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
-    .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
-    .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
-    .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
-    #list-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-    .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; box-sizing: border-box; }
-    .word-item { display: flex; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
-    .word-item .nl { font-weight: bold; }
-    .word-item .en { color: #666; margin-top: 6px; }
-    .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
-    .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
-    .sort-bar button.active { background: var(--primary); color: white; }
-    .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
-    .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Engelse grammatica trainer 1VWO</title>
+<style>
+:root{
+  --primary:#2c3e50; --blue:#3498db; --purple:#8e44ad; --orange:#f39c12; --bg:#f4f7f6; --line:#d8c6f0;
+}
+*{box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg); margin:0; color:var(--primary);
+}
+.wrap{max-width:760px; margin:0 auto; padding:18px;}
+h1{font-size:1.8rem; margin:6px 0 10px}
+.topnote{background:white; border-radius:18px; padding:14px 16px; box-shadow:0 4px 14px rgba(0,0,0,.06); margin-bottom:14px;}
+.tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;}
+.tabs button,.controls button,.mini-btn{
+  border:none; border-radius:14px; padding:12px 10px; font-weight:700; cursor:pointer;
+  background:white; color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.tabs button.active{background:var(--primary); color:white;}
+.controls{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0;}
+.controls .wide{grid-column:span 2;}
+.controls .accent{background:var(--blue); color:white;}
+.controls .warn{background:var(--orange); color:white;}
+.scene{width:100%; min-height:340px; perspective:1000px; margin-top:10px;}
+.card{
+  width:100%; min-height:340px; position:relative; transition:transform .45s; transform-style:preserve-3d; cursor:pointer;
+}
+.card.is-flipped{transform:rotateY(180deg)}
+.face{
+  position:absolute; inset:0; backface-visibility:hidden; background:white; border-radius:24px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08); padding:22px; overflow:auto; border:1px solid #e7e7e7;
+}
+.back{transform:rotateY(180deg); background:#fcfbff;}
+.label{font-size:.72rem; text-transform:uppercase; opacity:.55; font-weight:700; letter-spacing:1px; margin-bottom:10px}
+.star{position:absolute; right:16px; top:12px; color:var(--orange); font-size:1.35rem; display:none}
+.marked .star{display:block}
+.marked .face{border:3px solid var(--orange)}
+.front-title{font-size:1.55rem; font-weight:900; line-height:1.15; margin-bottom:12px}
+.front-sub{font-size:1.06rem; line-height:1.45}
+.back h3{margin:.1rem 0 .5rem; font-size:1.3rem}
+.back h4{margin:.85rem 0 .3rem; font-size:1rem}
+.back ul{margin:.15rem 0 .8rem 1.1rem; padding:0}
+.back li{margin:.18rem 0; line-height:1.4}
+.back table{width:100%; border-collapse:collapse; margin:.5rem 0 .8rem}
+.back td,.back th{border:1px solid var(--line); padding:8px 10px; vertical-align:top; text-align:left}
+.back th{background:#efe2ff}
+.progress{margin-top:12px; font-weight:700; color:#667}
+.row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+.pill{background:#eef5fb; color:#28506b; border-radius:999px; padding:6px 10px; font-size:.88rem; font-weight:700}
+.searchmodal{
+  display:none; position:fixed; inset:0; background:white; z-index:20; overflow:auto; padding:16px;
+}
+.searchmodal.show{display:block}
+.searchbox{width:100%; border:1px solid #ddd; border-radius:12px; padding:14px; font-size:1rem;}
+.item{border-bottom:1px solid #eee; padding:14px 4px; cursor:pointer; display:flex; justify-content:space-between; gap:10px}
+.item strong{display:block; margin-bottom:4px}
+.close-floating{position:fixed; right:18px; bottom:18px; background:var(--primary); color:white; padding:14px 18px; border-radius:999px; border:none}
+.refbox{background:white; border-radius:18px; padding:14px 16px; box-shadow:0 4px 14px rgba(0,0,0,.06); margin-top:14px; display:none}
+.refbox.show{display:block}
+.small{font-size:.92rem; line-height:1.45}
+</style>
 </head>
 <body>
-  <h3 style="color: var(--primary); margin-top: 10px;">Engels – phrases</h3>
+<div class="wrap">
+  <h1>Engelse grammatica trainer 1VWO</h1>
+  <div class="topnote small">
+    Suggestie voor verwerking: niet alleen losse flashcards, maar <strong>3 lagen</strong>:
+    <strong>regels</strong> (wat moet je weten), <strong>voorbeelden</strong> (wat moet je herkennen) en
+    <strong>toetsdrill</strong> (wat moet je actief kunnen reproduceren). Alles staat hieronder in één HTML.
+  </div>
+
+  <div class="tabs">
+    <button id="tab-rules" class="active" onclick="setMode('rules')">Regelkaarten</button>
+    <button id="tab-drill" onclick="setMode('drill')">Toetsdrill</button>
+    <button id="tab-ref" onclick="toggleReference()">Overzicht</button>
+  </div>
 
   <div class="scene" onclick="flip()">
-    <div class="card" id="card-element">
-      <div class="card-face card-front">
+    <div class="card" id="card">
+      <div class="face front">
         <div class="star">★</div>
-        <div class="label" id="label-front">Nederlands</div>
-        <div id="text-front" class="phrase">...</div>
-        <button class="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
+        <div class="label" id="frontLabel">Regelkaart</div>
+        <div class="front-title" id="frontTitle">...</div>
+        <div class="front-sub" id="frontSub">...</div>
       </div>
-      <div class="card-face card-back">
-        <div class="label" id="label-back">Engels</div>
-        <div id="text-back" class="phrase">...</div>
+      <div class="face back">
+        <div class="label" id="backLabel">Antwoord</div>
+        <div id="backContent">...</div>
       </div>
     </div>
   </div>
@@ -57,237 +99,476 @@
   <div class="controls">
     <button onclick="prev()">⬅️ Vorige</button>
     <button onclick="next()">Volgende ➡️</button>
-    <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
-    <button onclick="shuffle()">🔀 Husselen</button>
-    <button id="lang-btn" onclick="toggleLang()">🔄 EN ➔ NL</button>
-    <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
-    <button class="btn-blue" onclick="openList()">📋 Zinnenlijst & Zoeken</button>
-    <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+    <button class="warn wide" onclick="mark()">❌ Ken ik nog niet</button>
+    <button onclick="shuffleDeck()">🔀 Husselen</button>
+    <button onclick="toggleFilter()" id="filterBtn">Focus op moeilijk (0)</button>
+    <button class="accent wide" onclick="openList()">📋 Lijst & zoeken</button>
+    <button class="wide" onclick="toggleDirection()" id="dirBtn">🔄 Normaal</button>
+    <button class="wide" onclick="resetProgress()">🗑️ Voortgang wissen</button>
   </div>
 
   <div class="progress" id="progress">Kaart 1 van ...</div>
 
-  <div id="list-modal">
-    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
-      <input type="text" class="search-box" id="search-input" placeholder="Zoek zin..." oninput="renderList()">
-      <div class="sort-bar">
-        <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
-        <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
-      </div>
-    </div>
-    <div id="list-container"></div>
-    <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
-  </div>
+  <div id="refbox" class="refbox small"></div>
+</div>
 
-  <script>
-    const allPhrases = [
-      { nl: "Hij heeft een groen shirt en groene schoenen aan.", en: "He's got a green shirt and green shoes." },
-      { nl: "Er is een vrouw met een hoed met tijgerprint.", en: "There is a woman in a tiger print hat." },
-      { nl: "Die mannen zien eruit als modellen.", en: "These men look like models." },
-      { nl: "Ze is dat kleine meisje met de donkere ogen.", en: "She is the short girl with dark eyes." },
-      { nl: "De meeste modellen zijn lang en dun.", en: "Most models are tall and slim." },
-      { nl: "John is die kleine jongen met rood haar uit mijn klas.", en: "John is the short guy in my class with red hair." },
-      { nl: "Kijk eens naar die prachtige man - lang, donker en knap!", en: "Look at that gorgeous man – tall, dark and good-looking!" },
+<div id="listModal" class="searchmodal">
+  <input class="searchbox" id="searchInput" placeholder="Zoek onderwerp, regel of voorbeeld..." oninput="renderList()" />
+  <div id="listContainer"></div>
+  <button class="close-floating" onclick="closeList()">Sluiten ✕</button>
+</div>
 
-      { nl: "Staat dit mij goed?", en: "Does this look good on me?" },
-      { nl: "Het zit erg lekker.", en: "It's very comfortable." },
-      { nl: "Ik vind dat het er cool uitziet.", en: "I think it looks cool." },
-      { nl: "De nieuwste mode is gewoon raar.", en: "These latest fashions are just silly." },
-      { nl: "Naar mijn mening zijn rokken voor vrouwen.", en: "To my mind, skirts are for women." },
-      { nl: "Persoonlijk hou ik niet van rokken.", en: "Personally, I don't like skirts." },
-      { nl: "Ik denk dat ik liever strepen wil.", en: "I think I prefer stripes." },
-      { nl: "Het is perfect voor kerstfeestjes!", en: "It's perfect for Christmas parties!" },
-      { nl: "Wat vind je van stippen?", en: "What do you think about spots?" },
-      { nl: "Het staat je gewoon niet, ben ik bang.", en: "It just doesn't suit you, I'm afraid." },
+<script>
+const rules = [
+{
+  id:"ps-use",
+  title:"Present simple",
+  prompt:"Wanneer gebruik je de present simple?",
+  answerHTML:`
+    <h3>Present simple</h3>
+    <ul>
+      <li>Je gebruikt de <strong>present simple</strong> als iets <strong>altijd</strong>, <strong>nooit</strong> of <strong>regelmatig</strong> gebeurt.</li>
+      <li>Bij <strong>he / she / it</strong> voeg je meestal <strong>-s</strong> of <strong>-es</strong> toe.</li>
+    </ul>
+    <table>
+      <tr><td>I write</td><td>I go</td></tr>
+      <tr><td>you write</td><td>you go</td></tr>
+      <tr><td>he / she / it writes</td><td>he / she / it goes</td></tr>
+      <tr><td>we write</td><td>we go</td></tr>
+      <tr><td>you write</td><td>you go</td></tr>
+      <tr><td>they write</td><td>they go</td></tr>
+    </table>
+    <p><strong>Voorbeelden:</strong><br>The editor always arrives at 12.30.<br>That rock star never smashes his guitar.</p>`
+},
+{
+  id:"ps-neg-q",
+  title:"Present simple: vragen & ontkennen",
+  prompt:"Hoe maak je vragen en ontkenningen in de present simple?",
+  answerHTML:`
+    <h3>Present simple (negative and questions)</h3>
+    <table>
+      <tr><th>vragen</th><th>ontkennen</th></tr>
+      <tr><td>Do you like him?</td><td>I don't like him.</td></tr>
+      <tr><td>Do you think so?</td><td>Joss doesn't think so.</td></tr>
+    </table>
+    <ul>
+      <li>Gebruik <strong>do / does</strong> voor vragen.</li>
+      <li>Gebruik <strong>don't / doesn't</strong> voor ontkenningen.</li>
+      <li>Na <strong>does / doesn't</strong> gebruik je weer de <strong>hele werkwoordsvorm</strong>: <em>like</em>, niet <em>likes</em>.</li>
+    </ul>`
+},
+{
+  id:"this-that",
+  title:"This / that / these / those",
+  prompt:"Hoe gebruik je this, that, these en those?",
+  answerHTML:`
+    <h3>This / that / these / those</h3>
+    <ul>
+      <li><strong>enkelvoud</strong>: <strong>this / that</strong></li>
+      <li><strong>meervoud</strong>: <strong>these / those</strong></li>
+      <li><strong>dichtbij</strong>: this / these</li>
+      <li><strong>ver(der) weg</strong>: that / those</li>
+    </ul>
+    <table>
+      <tr><td>dichtbij</td><td><strong>this</strong> sweater</td><td><strong>these</strong> sweaters</td></tr>
+      <tr><td>ver(der) weg</td><td><strong>that</strong> sweater</td><td><strong>those</strong> sweaters</td></tr>
+    </table>`
+},
+{
+  id:"some-any",
+  title:"Some / any",
+  prompt:"Wanneer gebruik je some en any?",
+  answerHTML:`
+    <h3>Some / any</h3>
+    <ul>
+      <li><strong>some</strong> en <strong>any</strong> betekenen allebei: enige / enkele / een paar.</li>
+      <li><strong>not ... any</strong> betekent: <strong>geen</strong>.</li>
+    </ul>
+    <table>
+      <tr><th>bevestigend</th><th>ontkennend</th><th>vragend</th></tr>
+      <tr>
+        <td>I've got <strong>some</strong> great videos.</td>
+        <td>We haven't got <strong>any</strong> equipment.</td>
+        <td>Are you going to edit <strong>any</strong> films?</td>
+      </tr>
+    </table>`
+},
+{
+  id:"one-ones",
+  title:"One / ones",
+  prompt:"Waar gebruik je one en ones voor?",
+  answerHTML:`
+    <h3>One / ones</h3>
+    <ul>
+      <li>Je gebruikt <strong>one</strong> of <strong>ones</strong> om een zelfstandig naamwoord niet te herhalen.</li>
+      <li><strong>one</strong> = enkelvoud, <strong>ones</strong> = meervoud.</li>
+    </ul>
+    <p>Which <strong>skirt</strong> are you going to buy? – The white <strong>one</strong>.</p>
+    <p>These brown <strong>belts</strong> are cheaper than the black <strong>ones</strong> over there.</p>`
+},
+{
+  id:"short-answers",
+  title:"Short answers",
+  prompt:"Hoe werken korte antwoorden in het Engels?",
+  answerHTML:`
+    <h3>Short answers</h3>
+    <ul>
+      <li>In <strong>korte antwoorden</strong> herhaal je het <strong>hulpwerkwoord</strong>.</li>
+    </ul>
+    <table>
+      <tr><td>Have you got the camera?</td><td>Yes, I <strong>have</strong>. / No, I <strong>haven't</strong>.</td></tr>
+      <tr><td>Do you know the answers?</td><td>Yes, I <strong>do</strong>. / No, I <strong>don't</strong>.</td></tr>
+    </table>`
+},
+{
+  id:"plural",
+  title:"Plural",
+  prompt:"Hoe maak je meervouden in het Engels?",
+  answerHTML:`
+    <h3>Plural</h3>
+    <ul>
+      <li>De meeste meervouden eindigen op <strong>-s</strong>.</li>
+      <li>De uitspraak kan <strong>/s/</strong> of <strong>/z/</strong> zijn.</li>
+      <li>In het Engels krijgen meervouden <strong>nooit 's</strong>.</li>
+    </ul>
+    <table>
+      <tr><td>week</td><td>weeks</td><td>/s/</td></tr>
+      <tr><td>parent</td><td>parents</td><td>/s/</td></tr>
+      <tr><td>star</td><td>stars</td><td>/z/</td></tr>
+      <tr><td>friend</td><td>friends</td><td>/z/</td></tr>
+      <tr><td>voice</td><td>voices</td><td>/z/</td></tr>
+    </table>
+    <h4>Onregelmatige of bijzondere meervouden</h4>
+    <table>
+      <tr><td>child</td><td>children</td></tr>
+      <tr><td>foot</td><td>feet</td></tr>
+      <tr><td>tooth</td><td>teeth</td></tr>
+      <tr><td>scarf</td><td>scarves</td></tr>
+      <tr><td>lady</td><td>ladies</td></tr>
+      <tr><td>story</td><td>stories</td></tr>
+      <tr><td>photo</td><td>photos</td></tr>
+    </table>`
+},
+{
+  id:"ps-vs-pc",
+  title:"Present simple vs present continuous",
+  prompt:"Wat is het verschil tussen present simple en present continuous?",
+  answerHTML:`
+    <h3>Present simple or present continuous</h3>
+    <ul>
+      <li><strong>Present simple</strong>: iets gebeurt altijd, nooit of regelmatig.</li>
+      <li><strong>Present continuous</strong>: iets is <strong>nu</strong> bezig / aan de gang.</li>
+    </ul>
+    <table>
+      <tr><td>I <em>often</em> <strong>cut</strong> onions.</td><td>I <strong>am cutting</strong> onions <em>now</em>.</td></tr>
+      <tr><td>He / She <em>often</em> <strong>cuts</strong> onions.</td><td>He / She <strong>is cutting</strong> onions <em>now</em>.</td></tr>
+      <tr><td>We <em>often</em> <strong>cut</strong> onions.</td><td>We <strong>are cutting</strong> onions <em>now</em>.</td></tr>
+    </table>`
+},
+{
+  id:"imperative",
+  title:"Imperative",
+  prompt:"Hoe werkt de gebiedende wijs (imperative)?",
+  answerHTML:`
+    <h3>Imperative</h3>
+    <table>
+      <tr><th>Wel doen</th><th>Niet doen</th></tr>
+      <tr><td><strong>Keep</strong> quiet.</td><td><strong>Don't</strong> run.</td></tr>
+      <tr><td><strong>Pick up</strong> those bags.</td><td>And <strong>don't say</strong> a word.</td></tr>
+      <tr><td><strong>Put</strong> your dishes in the oven.</td><td>And <strong>don't tell</strong> anybody.</td></tr>
+      <tr><td><strong>Read</strong> pages 30 to 34.</td><td><strong>Don't mess</strong> it up.</td></tr>
+    </table>
+    <ul>
+      <li>Gebruik de <strong>hele werkwoordsvorm</strong>.</li>
+      <li>Voor ontkenning gebruik je <strong>don't + werkwoord</strong>.</li>
+    </ul>`
+},
+{
+  id:"should",
+  title:"Should / shouldn't",
+  prompt:"Hoe gebruik je should en shouldn't?",
+  answerHTML:`
+    <h3>Should / shouldn't</h3>
+    <table>
+      <tr><th>should + hele werkwoord</th><th>(zou) eigenlijk moeten</th></tr>
+      <tr><th>shouldn't + hele werkwoord</th><th>(zou) eigenlijk niet moeten</th></tr>
+    </table>
+    <p>I <strong>should drink</strong> more water.<br>They <strong>should put</strong> their rubbish in the bin.</p>
+    <p>You <strong>shouldn't spit</strong> it out.<br>She <strong>shouldn't do</strong> that.</p>`
+},
+{
+  id:"much-many",
+  title:"Much / many / (a) little / (a) few",
+  prompt:"Hoe kies je tussen much, many, little, few, a little en a few?",
+  answerHTML:`
+    <h3>Much / many / (a) little / (a) few</h3>
+    <table>
+      <tr><td><strong>much</strong></td><td>veel + niet-telbare zn</td><td>much work, much time, much money</td></tr>
+      <tr><td><strong>many</strong></td><td>veel + telbare zn</td><td>many shows, many shops, many articles</td></tr>
+      <tr><td><strong>little</strong></td><td>weinig + niet-telbare zn</td><td>too little money, too little salt</td></tr>
+      <tr><td><strong>few</strong></td><td>weinig + telbare zn</td><td>very few people, too few customers</td></tr>
+      <tr><td><strong>a little</strong></td><td>een beetje + niet-telbare zn</td><td>a little tomato sauce</td></tr>
+      <tr><td><strong>a few</strong></td><td>een paar + telbare zn</td><td>a few onions</td></tr>
+    </table>
+    <ul>
+      <li><strong>Telbare</strong> zn: je kunt er een getal voor zetten: one student, two students.</li>
+      <li><strong>Niet-telbare</strong> zn: geen meervoud, zoals <em>time</em> en <em>milk</em>.</li>
+      <li><strong>many</strong> kan in bevestigende, vragende en ontkennende zinnen.</li>
+      <li><strong>much</strong> gebruik je over het algemeen alleen in vragende en ontkennende zinnen.</li>
+    </ul>`
+},
+{
+  id:"ps-drill",
+  title:"Present simple overzicht",
+  prompt:"Kun je de basisvormen, vragen en ontkenningen reproduceren?",
+  answerHTML:`
+    <h3>Present simple overzicht</h3>
+    <table>
+      <tr><th>bevestigend</th><th>vragen met do / does</th><th>ontkennen met don't / doesn't</th></tr>
+      <tr><td>I <strong>like</strong> him.</td><td><strong>Do</strong> I <strong>like</strong> him?</td><td>I <strong>don't like</strong> him.</td></tr>
+      <tr><td>You <strong>like</strong> him.</td><td><strong>Do</strong> you <strong>like</strong> him?</td><td>You <strong>don't like</strong> him.</td></tr>
+      <tr><td>He / She / It <strong>likes</strong> him.</td><td><strong>Does</strong> he / she / it <strong>like</strong> him?</td><td>He / She / It <strong>doesn't like</strong> him.</td></tr>
+      <tr><td>We <strong>like</strong> him.</td><td><strong>Do</strong> we <strong>like</strong> him?</td><td>We <strong>don't like</strong> him.</td></tr>
+      <tr><td>You <strong>like</strong> him.</td><td><strong>Do</strong> you <strong>like</strong> him?</td><td>You <strong>don't like</strong> him.</td></tr>
+      <tr><td>They <strong>like</strong> him.</td><td><strong>Do</strong> they <strong>like</strong> him?</td><td>They <strong>don't like</strong> him.</td></tr>
+    </table>`
+},
+{
+  id:"pc",
+  title:"Present continuous",
+  prompt:"Wat is de vorm van de present continuous?",
+  answerHTML:`
+    <h3>Present continuous</h3>
+    <ul>
+      <li><strong>Vorm:</strong> vorm van <strong>to be</strong> (<strong>am / are / is</strong>) + werkwoord + <strong>-ing</strong></li>
+      <li><strong>Gebruik:</strong> iets is nu aan de gang / bezig.</li>
+    </ul>
+    <table>
+      <tr><th>bevestigend</th><th>ontkennend</th><th>vragend</th></tr>
+      <tr><td>I'm <strong>reading</strong> a book.</td><td>I'm <strong>not reading</strong> a book.</td><td><strong>Am</strong> I <strong>reading</strong> a book?</td></tr>
+      <tr><td>You're <strong>reading</strong> a book.</td><td>You're <strong>not reading</strong> a book.</td><td><strong>Are</strong> you <strong>reading</strong> a book?</td></tr>
+      <tr><td>He / She's <strong>reading</strong> a book.</td><td>He / She's <strong>not reading</strong> a book.</td><td><strong>Is</strong> he / she <strong>reading</strong> a book?</td></tr>
+      <tr><td>We're <strong>reading</strong> a book.</td><td>We're <strong>not reading</strong> a book.</td><td><strong>Are</strong> we <strong>reading</strong> a book?</td></tr>
+      <tr><td>You're <strong>reading</strong> a book.</td><td>You're <strong>not reading</strong> a book.</td><td><strong>Are</strong> you <strong>reading</strong> a book?</td></tr>
+      <tr><td>They're <strong>reading</strong> a book.</td><td>They're <strong>not reading</strong> a book.</td><td><strong>Are</strong> they <strong>reading</strong> a book?</td></tr>
+    </table>`
+},
+{
+  id:"qtags",
+  title:"Question tags",
+  prompt:"Hoe werken question tags?",
+  answerHTML:`
+    <h3>Question tags</h3>
+    <ul>
+      <li>Een <strong>tag</strong> is een kort vraagje aan het einde van een zin: <em>..., is it?</em> / <em>..., isn't it?</em> / <em>... can't you?</em></li>
+      <li>Na een <strong>bevestigende</strong> zin (+) is de tag <strong>ontkennend</strong> (−).</li>
+      <li>Na een <strong>ontkennende</strong> zin (−) is de tag <strong>bevestigend</strong> (+).</li>
+    </ul>
+    <table>
+      <tr><th>+</th><th>−</th><th>−</th><th>+</th></tr>
+      <tr><td>You're at school together,</td><td><strong>aren't you?</strong></td><td>You're not busy,</td><td><strong>are you?</strong></td></tr>
+      <tr><td>Hi there, it's Sharon,</td><td><strong>isn't it?</strong></td><td>She's not angry,</td><td><strong>is she?</strong></td></tr>
+      <tr><td>You can hear me now,</td><td><strong>can't you?</strong></td><td>You can't help me,</td><td><strong>can you?</strong></td></tr>
+    </table>`
+}
+];
 
-      { nl: "Hoeveel kosten deze truien?", en: "How much are these sweaters?" },
-      { nl: "Ze kosten slechts £14,50 per stuk.", en: "They only cost £14.50 each." },
-      { nl: "Pardon, heeft u dit ontwerp in maat M?", en: "Excuse me, have you got this design in a medium?" },
-      { nl: "We hebben de witte in een M.", en: "We've got the white one in a medium." },
-      { nl: "Ik denk dat mijn zus een S'je heeft.", en: "I think my sister's a small." },
+const drills = [
+  {id:"d1", q:"Wanneer gebruik je de present simple?", a:"Als iets altijd, nooit of regelmatig gebeurt."},
+  {id:"d2", q:"Wat voeg je meestal toe bij he / she / it in de present simple?", a:"-s of -es."},
+  {id:"d3", q:"Hoe maak je een vraag in de present simple?", a:"Met do / does + onderwerp + hele werkwoord."},
+  {id:"d4", q:"Hoe maak je een ontkenning in de present simple?", a:"Met don't / doesn't + hele werkwoord."},
+  {id:"d5", q:"Dichtbij, enkelvoud: welk woord?", a:"this"},
+  {id:"d6", q:"Ver weg, meervoud: welk woord?", a:"those"},
+  {id:"d7", q:"Bevestigende zin: I've got ... great videos.", a:"some"},
+  {id:"d8", q:"Ontkennende zin: We haven't got ... equipment.", a:"any"},
+  {id:"d9", q:"Vraag: Are you going to edit ... films?", a:"any"},
+  {id:"d10", q:"Enkelvoud ter vervanging van een zelfstandig naamwoord?", a:"one"},
+  {id:"d11", q:"Meervoud ter vervanging van een zelfstandig naamwoord?", a:"ones"},
+  {id:"d12", q:"Wat herhaal je in short answers?", a:"Het hulpwerkwoord."},
+  {id:"d13", q:"Yes, I ... / No, I haven't.", a:"have"},
+  {id:"d14", q:"Yes, I ... / No, I don't.", a:"do"},
+  {id:"d15", q:"Meestal meervoud in het Engels: welke uitgang?", a:"-s"},
+  {id:"d16", q:"Onregelmatig meervoud van child", a:"children"},
+  {id:"d17", q:"Onregelmatig meervoud van foot", a:"feet"},
+  {id:"d18", q:"Onregelmatig meervoud van tooth", a:"teeth"},
+  {id:"d19", q:"Meervoud van scarf", a:"scarves"},
+  {id:"d20", q:"Meervoud van lady", a:"ladies"},
+  {id:"d21", q:"Meervoud van story", a:"stories"},
+  {id:"d22", q:"Meervoud van photo", a:"photos"},
+  {id:"d23", q:"Present simple of present continuous voor iets dat nu bezig is?", a:"Present continuous."},
+  {id:"d24", q:"Vorm van de present continuous", a:"am / are / is + werkwoord + -ing"},
+  {id:"d25", q:"Gebiedende wijs positief: welke vorm gebruik je?", a:"De hele werkwoordsvorm."},
+  {id:"d26", q:"Gebiedende wijs negatief: hoe maak je die?", a:"don't + hele werkwoord"},
+  {id:"d27", q:"Betekenis van should", a:"(zou) eigenlijk moeten"},
+  {id:"d28", q:"Betekenis van shouldn't", a:"(zou) eigenlijk niet moeten"},
+  {id:"d29", q:"much gebruik je bij telbare of niet-telbare zelfstandige naamwoorden?", a:"Niet-telbare."},
+  {id:"d30", q:"many gebruik je bij telbare of niet-telbare zelfstandige naamwoorden?", a:"Telbare."},
+  {id:"d31", q:"little of few bij niet-telbare zelfstandige naamwoorden?", a:"little"},
+  {id:"d32", q:"little of few bij telbare zelfstandige naamwoorden?", a:"few"},
+  {id:"d33", q:"a little betekent ...", a:"een beetje + niet-telbare zelfstandige naamwoorden"},
+  {id:"d34", q:"a few betekent ...", a:"een paar + telbare zelfstandige naamwoorden"},
+  {id:"d35", q:"Na een bevestigende zin is de question tag ...", a:"ontkennend"},
+  {id:"d36", q:"Na een ontkennende zin is de question tag ...", a:"bevestigend"},
+  {id:"d37", q:"Question tag bij: You're at school together, ... ?", a:"aren't you?"},
+  {id:"d38", q:"Question tag bij: You're not busy, ... ?", a:"are you?"},
+  {id:"d39", q:"Question tag bij: It's Sharon, ... ?", a:"isn't it?"},
+  {id:"d40", q:"Question tag bij: You can't help me, ... ?", a:"can you?"}
+];
 
-      { nl: "Laten we afspreken voor een drankje in The Cube Café.", en: "Let's meet in The Cube Café for a drink." },
-      { nl: "Oké, dan zie ik je om drie uur!", en: "OK, see you at three o'clock!" },
-      { nl: "Kunnen we ergens afspreken?", en: "Can we meet somewhere?" },
-      { nl: "Ik zou met je mee kunnen gaan.", en: "I could come with you." },
-      { nl: "Zou je het leuk vinden om mee te gaan?", en: "Would you like to come along?" },
+let mode = 'rules';
+let direction = 'normal';
+let allDeck = rules;
+let currentList = [...allDeck];
+let idx = 0;
+let difficult = JSON.parse(localStorage.getItem('eng_grammar_difficult') || '[]');
+let filterOn = false;
 
-      { nl: "Zou je me de weg kunnen wijzen?", en: "Could you give me directions?" },
-      { nl: "Pardon, zou u mij de weg kunnen wijzen naar de Jubilee Hall?", en: "Excuse me, could you tell me the way to the Jubilee Hall?" },
-      { nl: "Ik zal het je laten zien op de plattegrond.", en: "Let me show you on the floor plan." },
-      { nl: "Kijk, we zijn hier, bij deze ingang.", en: "Look, we are by this entrance, here." },
-      { nl: "Het restaurant is aan het einde van de winkelgalerij aan de linkerkant.", en: "The restaurant is at the end of the arcade to the left." },
-      { nl: "Blijf hier gewoon rechtdoor gaan.", en: "Just keep going along here." },
+function currentItem(){ return currentList[idx]; }
 
-      { nl: "Laten we de ... proberen.", en: "Let's try the ..." },
-      { nl: "Wat dacht je van dit / dat idee?", en: "How's this / that for an idea?" },
-      { nl: "Ik heb een idee!", en: "I've got an idea!" },
-      { nl: "Hoe zou je het vinden om ... ?", en: "How do you fancy ... ?" },
-      { nl: "Wat dacht je van ... ?", en: "How about ... ?" },
-      { nl: "Waarom gaan we niet met z'n allen ... ?", en: "Why don't we all ... ?" },
-      { nl: "Willen jullie allebei ... ?", en: "Do you both want to ... ?" },
+function save(){
+  localStorage.setItem('eng_grammar_difficult', JSON.stringify(difficult));
+  localStorage.setItem('eng_grammar_mode', mode);
+  localStorage.setItem('eng_grammar_direction', direction);
+  localStorage.setItem('eng_grammar_idx_' + mode, idx);
+}
+function load(){
+  const m = localStorage.getItem('eng_grammar_mode'); if(m) mode = m;
+  const d = localStorage.getItem('eng_grammar_direction'); if(d) direction = d;
+  setMode(mode, true);
+  const savedIdx = parseInt(localStorage.getItem('eng_grammar_idx_' + mode) || '0', 10);
+  idx = Math.min(savedIdx, Math.max(0, currentList.length - 1));
+}
+function isMarked(item){ return difficult.includes(item.id); }
 
-      { nl: "Hoe krijgen we Joe hier?", en: "How are we going to get Joe there?" },
-      { nl: "Laten we daar afspreken om ...", en: "Let's meet there at ..." },
-      { nl: "Zeg tegen Joe dat hij ...", en: "Tell Joe to ..." },
-      { nl: "Kom om zeven uur.", en: "Come at 7 pm." },
+function render(){
+  const item = currentItem();
+  const card = document.getElementById('card');
+  card.classList.remove('is-flipped');
+  card.classList.toggle('marked', isMarked(item));
 
-      { nl: "Ik zou je niet kunnen vertellen of het een duur restaurant is.", en: "I couldn't tell you if it's an expensive restaurant." },
-      { nl: "We zouden in plaats daarvan de Noodle Bar kunnen proberen!", en: "We could try the Noodle Bar instead!" },
-      { nl: "We kunnen met z'n allen Happy Birthday voor hem zingen!", en: "We can all sing Happy Birthday to him!" },
-      { nl: "Ik kan niet te veel mensen uitnodigen - ik heb een beperkt budget.", en: "I can't invite too many people – I'm on a budget." },
-      { nl: "Moet ik een tafel reserveren?", en: "Should I book a table?" },
-      { nl: "We moeten hem er niets over vertellen.", en: "We shouldn't tell him about it." },
-      { nl: "Ik denk dat we hem mee moeten nemen naar ...", en: "I think we should take him to ..." },
-      { nl: "Hoeveel vrienden zullen we uitnodigen?", en: "How many friends should we invite?" },
-      { nl: "We moeten eigenlijk Aryan vragen of hij ook wil komen ...", en: "We should ask Aryan if he wants to come, too ..." },
-      { nl: "Ik zou dit eigenlijk niet moeten zeggen, maar ...", en: "I shouldn't say this, but ..." },
-
-      { nl: "Bekijk het menu eens.", en: "Have a look at the menu." },
-      { nl: "Bestel voor mij maar een ..., alsjeblieft.", en: "Order a ... for me, please." },
-      { nl: "Ga zitten! / Neem plaats!", en: "Take a seat!" },
-
-      { nl: "Luister!", en: "Listen!" },
-      { nl: "Pardon, ...", en: "Excuse me, ..." },
-
-      { nl: "Kan ik je / u helpen?", en: "Can I help you?" },
-      { nl: "Ik zou graag een ... willen.", en: "I'd like a ... please." },
-      { nl: "Wil(t) je / u daar (een) ... bij?", en: "Would you like a ... with that?" },
-      { nl: "Was dat alles? / Anders nog iets?", en: "Will that be all?" },
-      { nl: "Dat is alles. / Dat was het, bedankt.", en: "That's all, thanks." },
-      { nl: "Hoeveel is het, alles bij elkaar?", en: "How much does that come to?" },
-
-      { nl: "Wat moeten we doen?", en: "What do we need to do?" },
-      { nl: "Eerst snijd je de kip en de groenten.", en: "First, you chop the chicken and the vegetables." },
-      { nl: "Daarna bak je de kip, voeg de groenten toe.", en: "Next, you fry the chicken, add the vegetables." },
-      { nl: "Dan giet je de sojasaus erbij.", en: "Then pour in the soy sauce." },
-      { nl: "Hoe kook je rijst?", en: "How do you cook rice?" },
-      { nl: "Zodra het water kookt, voeg je de rijst toe.", en: "When the water is boiling, add the rice." }
-    ];
-
-    let difficultPhrases = [];
-    let currentList = [...allPhrases];
-    let idx = 0;
-    let isEnToNl = false;
-    let filterOn = false;
-    let sortMode = 'std';
-
-    const card = document.getElementById('card-element');
-    const textFront = document.getElementById('text-front');
-    const textBack = document.getElementById('text-back');
-    const prog = document.getElementById('progress');
-
-    function load() {
-      const saved = JSON.parse(localStorage.getItem('eng_phrases_u45_v1') || '{}');
-      if (saved.diffIndices) difficultPhrases = saved.diffIndices.map(i => allPhrases[i]).filter(Boolean);
-      if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, currentList.length - 1);
-      if (saved.isEnToNl !== undefined) isEnToNl = saved.isEnToNl;
+  if(mode === 'rules'){
+    document.getElementById('frontLabel').textContent = direction === 'normal' ? 'Regelkaart' : 'Toetsprompt';
+    document.getElementById('backLabel').textContent = direction === 'normal' ? 'Uitleg' : 'Volledige regel';
+    if(direction === 'normal'){
+      document.getElementById('frontTitle').textContent = item.title;
+      document.getElementById('frontSub').textContent = item.prompt;
+      document.getElementById('backContent').innerHTML = item.answerHTML;
+    } else {
+      document.getElementById('frontTitle').textContent = item.prompt;
+      document.getElementById('frontSub').textContent = 'Noem de regel, vorm en voorbeelden.';
+      document.getElementById('backContent').innerHTML = `<h3>${item.title}</h3>` + item.answerHTML;
     }
-
-    function save() {
-      localStorage.setItem('eng_phrases_u45_v1', JSON.stringify({
-        diffIndices: difficultPhrases.map(w => allPhrases.indexOf(w)),
-        lastIdx: idx,
-        isEnToNl
-      }));
+  } else {
+    document.getElementById('frontLabel').textContent = direction === 'normal' ? 'Toetsdrill' : 'Antwoord → vraag';
+    document.getElementById('backLabel').textContent = 'Antwoord';
+    if(direction === 'normal'){
+      document.getElementById('frontTitle').textContent = item.q;
+      document.getElementById('frontSub').textContent = 'Probeer het eerst hardop te zeggen voordat je omdraait.';
+      document.getElementById('backContent').innerHTML = `<h3>${item.a}</h3>`;
+    } else {
+      document.getElementById('frontTitle').textContent = item.a;
+      document.getElementById('frontSub').textContent = 'Van welk toetsitem was dit het antwoord?';
+      document.getElementById('backContent').innerHTML = `<h3>${item.q}</h3>`;
     }
+  }
 
-    function update() {
-      if (!currentList.length) return;
-      card.classList.remove('is-flipped');
-      const item = currentList[idx];
-      if (isEnToNl) {
-        textFront.textContent = item.en;
-        textBack.textContent = item.nl;
-        document.getElementById('label-front').textContent = 'Engels';
-        document.getElementById('label-back').textContent = 'Nederlands';
-        document.getElementById('lang-btn').textContent = '🔄 NL ➔ EN';
+  document.getElementById('progress').textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+  document.getElementById('filterBtn').textContent = `Focus op moeilijk (${difficult.length})`;
+  document.getElementById('dirBtn').textContent = direction === 'normal' ? '🔄 Normaal' : '🔄 Omgekeerd';
+  document.getElementById('tab-rules').classList.toggle('active', mode === 'rules');
+  document.getElementById('tab-drill').classList.toggle('active', mode === 'drill');
+  save();
+}
+function setMode(newMode, silent=false){
+  mode = newMode;
+  allDeck = mode === 'rules' ? rules : drills;
+  currentList = filterOn ? allDeck.filter(x => difficult.includes(x.id)) : [...allDeck];
+  if(!silent) idx = 0;
+  if(currentList.length === 0){ filterOn = false; currentList = [...allDeck]; idx = 0; }
+  render();
+}
+function flip(){ document.getElementById('card').classList.toggle('is-flipped'); }
+function prev(){ idx = (idx - 1 + currentList.length) % currentList.length; render(); }
+function next(){ idx = (idx + 1) % currentList.length; render(); }
+function shuffleDeck(){ currentList.sort(() => Math.random() - .5); idx = 0; render(); }
+function toggleDirection(){ direction = direction === 'normal' ? 'reverse' : 'normal'; render(); }
+function mark(){
+  const id = currentItem().id;
+  if(difficult.includes(id)) difficult = difficult.filter(x => x !== id);
+  else difficult.push(id);
+  render();
+}
+function toggleFilter(){
+  filterOn = !filterOn;
+  currentList = filterOn ? allDeck.filter(x => difficult.includes(x.id)) : [...allDeck];
+  if(currentList.length === 0){ alert('Nog geen moeilijke kaarten in deze modus.'); filterOn = false; currentList = [...allDeck]; }
+  idx = 0; render();
+}
+function openList(){ document.getElementById('listModal').classList.add('show'); renderList(); }
+function closeList(){ document.getElementById('listModal').classList.remove('show'); }
+function renderList(){
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const container = document.getElementById('listContainer');
+  container.innerHTML = '';
+  allDeck.forEach((item, i) => {
+    const hay = mode === 'rules'
+      ? (item.title + ' ' + item.prompt + ' ' + item.answerHTML.replace(/<[^>]+>/g,' ')).toLowerCase()
+      : (item.q + ' ' + item.a).toLowerCase();
+    if(!q || hay.includes(q)){
+      const div = document.createElement('div');
+      div.className = 'item';
+      const left = document.createElement('div');
+      if(mode === 'rules'){
+        left.innerHTML = `<strong>${item.title}</strong><div>${item.prompt}</div>`;
       } else {
-        textFront.textContent = item.nl;
-        textBack.textContent = item.en;
-        document.getElementById('label-front').textContent = 'Nederlands';
-        document.getElementById('label-back').textContent = 'Engels';
-        document.getElementById('lang-btn').textContent = '🔄 EN ➔ NL';
+        left.innerHTML = `<strong>${item.q}</strong><div>${item.a}</div>`;
       }
-      prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
-      card.classList.toggle('is-marked', difficultPhrases.includes(item));
-      document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultPhrases.length})`;
-      save();
-    }
-
-    function flip() { card.classList.toggle('is-flipped'); }
-    function next() { idx = (idx + 1) % currentList.length; update(); }
-    function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
-    function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
-    function toggleLang() { isEnToNl = !isEnToNl; update(); }
-    function mark() {
-      const item = currentList[idx];
-      if (!difficultPhrases.includes(item)) difficultPhrases.push(item);
-      else difficultPhrases = difficultPhrases.filter(w => w !== item);
-      update();
-    }
-    function toggleFilter() {
-      filterOn = !filterOn;
-      currentList = filterOn ? [...difficultPhrases] : [...allPhrases];
-      if (currentList.length === 0 && filterOn) {
-        alert('Geen moeilijke zinnen!');
+      const right = document.createElement('div');
+      right.textContent = difficult.includes(item.id) ? '★' : '';
+      div.append(left, right);
+      div.onclick = () => {
         filterOn = false;
-        currentList = [...allPhrases];
-      }
-      idx = 0;
-      update();
+        currentList = [...allDeck];
+        idx = i;
+        closeList();
+        render();
+      };
+      container.appendChild(div);
     }
-    function speak() {
-      const item = currentList[idx];
-      const utterance = new SpeechSynthesisUtterance(item.en);
-      utterance.lang = 'en-GB';
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
-    function closeList() { document.getElementById('list-modal').style.display = 'none'; }
-    function setSort(m) {
-      sortMode = m;
-      document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
-      document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
-      renderList();
-    }
-
-    function renderList() {
-      const q = document.getElementById('search-input').value.toLowerCase();
-      const container = document.getElementById('list-container');
-      container.innerHTML = '';
-      let list = allPhrases.map((w, i) => ({ ...w, origIdx: i }));
-      if (sortMode === 'diff') {
-        list.sort((a, b) => difficultPhrases.includes(allPhrases[b.origIdx]) - difficultPhrases.includes(allPhrases[a.origIdx]));
-      }
-      list.forEach(w => {
-        if (w.nl.toLowerCase().includes(q) || w.en.toLowerCase().includes(q)) {
-          const div = document.createElement('div');
-          div.className = 'word-item';
-          div.innerHTML = `<div><div class="nl">${w.nl}</div><div class="en">${w.en}</div></div><span>${difficultPhrases.includes(allPhrases[w.origIdx]) ? '★' : ''}</span>`;
-          div.onclick = () => {
-            filterOn = false;
-            currentList = [...allPhrases];
-            idx = w.origIdx;
-            update();
-            closeList();
-          };
-          container.appendChild(div);
-        }
-      });
-    }
-
-    function resetProgress() {
-      if (confirm('Wis voortgang?')) {
-        localStorage.removeItem('eng_phrases_u45_v1');
-        location.reload();
-      }
-    }
-
-    load();
-    update();
-  </script>
+  });
+}
+function toggleReference(){
+  const box = document.getElementById('refbox');
+  const show = !box.classList.contains('show');
+  box.classList.toggle('show', show);
+  if(show){
+    box.innerHTML = `
+      <h3 style="margin:.2rem 0 .7rem">Slimme aanpak voor een toets</h3>
+      <ol>
+        <li><strong>Regelkaarten</strong>: leer eerst de regels per onderwerp.</li>
+        <li><strong>Toetsdrill</strong>: oefen daarna actief zonder spieken.</li>
+        <li><strong>Focus op moeilijk</strong>: markeer wat nog niet zit.</li>
+        <li><strong>Omgekeerd</strong>: laat jezelf vanuit antwoord → vraag denken.</li>
+      </ol>
+      <p><strong>Mijn advies:</strong> voor 1VWO is dit veel beter dan alleen pure flashcards, omdat grammatica niet alleen woordjes stampen is maar vooral <strong>patronen herkennen en kunnen reproduceren</strong>.</p>`;
+    document.getElementById('tab-ref').classList.add('active');
+  } else {
+    document.getElementById('tab-ref').classList.remove('active');
+  }
+}
+function resetProgress(){
+  if(confirm('Voortgang wissen?')){
+    localStorage.removeItem('eng_grammar_difficult');
+    localStorage.removeItem('eng_grammar_mode');
+    localStorage.removeItem('eng_grammar_direction');
+    localStorage.removeItem('eng_grammar_idx_rules');
+    localStorage.removeItem('eng_grammar_idx_drill');
+    location.reload();
+  }
+}
+load();
+render();
+</script>
 </body>
 </html>
