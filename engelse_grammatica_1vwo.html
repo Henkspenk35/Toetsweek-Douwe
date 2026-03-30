@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Engels Phrases U4-5</title>
+  <style>
+    :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    .scene { width: 100%; max-width: 420px; height: 300px; perspective: 1000px; margin: 20px 0; }
+    .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+    .card.is-flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; overflow-wrap: break-word; }
+    .card-front { color: var(--primary); }
+    .card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
+    .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.55; letter-spacing: 1px; }
+    .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+    .is-marked .star { display: block; }
+    .is-marked .card-face { border: 3px solid var(--orange); }
+    .phrase { font-size: 1.55rem; line-height: 1.45; font-weight: 600; }
+    .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
+    button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+    .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+    .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+    .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+    #list-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+    .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; box-sizing: border-box; }
+    .word-item { display: flex; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .word-item .nl { font-weight: bold; }
+    .word-item .en { color: #666; margin-top: 6px; }
+    .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+    .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
+    .sort-bar button.active { background: var(--primary); color: white; }
+    .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+    .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+  </style>
+</head>
+<body>
+  <h3 style="color: var(--primary); margin-top: 10px;">Engels – phrases</h3>
+
+  <div class="scene" onclick="flip()">
+    <div class="card" id="card-element">
+      <div class="card-face card-front">
+        <div class="star">★</div>
+        <div class="label" id="label-front">Nederlands</div>
+        <div id="text-front" class="phrase">...</div>
+        <button class="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
+      </div>
+      <div class="card-face card-back">
+        <div class="label" id="label-back">Engels</div>
+        <div id="text-back" class="phrase">...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prev()">⬅️ Vorige</button>
+    <button onclick="next()">Volgende ➡️</button>
+    <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+    <button onclick="shuffle()">🔀 Husselen</button>
+    <button id="lang-btn" onclick="toggleLang()">🔄 EN ➔ NL</button>
+    <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+    <button class="btn-blue" onclick="openList()">📋 Zinnenlijst & Zoeken</button>
+    <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+  </div>
+
+  <div class="progress" id="progress">Kaart 1 van ...</div>
+
+  <div id="list-modal">
+    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+      <input type="text" class="search-box" id="search-input" placeholder="Zoek zin..." oninput="renderList()">
+      <div class="sort-bar">
+        <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+        <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+      </div>
+    </div>
+    <div id="list-container"></div>
+    <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+  </div>
+
+  <script>
+    const allPhrases = [
+      { nl: "Hij heeft een groen shirt en groene schoenen aan.", en: "He's got a green shirt and green shoes." },
+      { nl: "Er is een vrouw met een hoed met tijgerprint.", en: "There is a woman in a tiger print hat." },
+      { nl: "Die mannen zien eruit als modellen.", en: "These men look like models." },
+      { nl: "Ze is dat kleine meisje met de donkere ogen.", en: "She is the short girl with dark eyes." },
+      { nl: "De meeste modellen zijn lang en dun.", en: "Most models are tall and slim." },
+      { nl: "John is die kleine jongen met rood haar uit mijn klas.", en: "John is the short guy in my class with red hair." },
+      { nl: "Kijk eens naar die prachtige man - lang, donker en knap!", en: "Look at that gorgeous man – tall, dark and good-looking!" },
+
+      { nl: "Staat dit mij goed?", en: "Does this look good on me?" },
+      { nl: "Het zit erg lekker.", en: "It's very comfortable." },
+      { nl: "Ik vind dat het er cool uitziet.", en: "I think it looks cool." },
+      { nl: "De nieuwste mode is gewoon raar.", en: "These latest fashions are just silly." },
+      { nl: "Naar mijn mening zijn rokken voor vrouwen.", en: "To my mind, skirts are for women." },
+      { nl: "Persoonlijk hou ik niet van rokken.", en: "Personally, I don't like skirts." },
+      { nl: "Ik denk dat ik liever strepen wil.", en: "I think I prefer stripes." },
+      { nl: "Het is perfect voor kerstfeestjes!", en: "It's perfect for Christmas parties!" },
+      { nl: "Wat vind je van stippen?", en: "What do you think about spots?" },
+      { nl: "Het staat je gewoon niet, ben ik bang.", en: "It just doesn't suit you, I'm afraid." },
+
+      { nl: "Hoeveel kosten deze truien?", en: "How much are these sweaters?" },
+      { nl: "Ze kosten slechts £14,50 per stuk.", en: "They only cost £14.50 each." },
+      { nl: "Pardon, heeft u dit ontwerp in maat M?", en: "Excuse me, have you got this design in a medium?" },
+      { nl: "We hebben de witte in een M.", en: "We've got the white one in a medium." },
+      { nl: "Ik denk dat mijn zus een S'je heeft.", en: "I think my sister's a small." },
+
+      { nl: "Laten we afspreken voor een drankje in The Cube Café.", en: "Let's meet in The Cube Café for a drink." },
+      { nl: "Oké, dan zie ik je om drie uur!", en: "OK, see you at three o'clock!" },
+      { nl: "Kunnen we ergens afspreken?", en: "Can we meet somewhere?" },
+      { nl: "Ik zou met je mee kunnen gaan.", en: "I could come with you." },
+      { nl: "Zou je het leuk vinden om mee te gaan?", en: "Would you like to come along?" },
+
+      { nl: "Zou je me de weg kunnen wijzen?", en: "Could you give me directions?" },
+      { nl: "Pardon, zou u mij de weg kunnen wijzen naar de Jubilee Hall?", en: "Excuse me, could you tell me the way to the Jubilee Hall?" },
+      { nl: "Ik zal het je laten zien op de plattegrond.", en: "Let me show you on the floor plan." },
+      { nl: "Kijk, we zijn hier, bij deze ingang.", en: "Look, we are by this entrance, here." },
+      { nl: "Het restaurant is aan het einde van de winkelgalerij aan de linkerkant.", en: "The restaurant is at the end of the arcade to the left." },
+      { nl: "Blijf hier gewoon rechtdoor gaan.", en: "Just keep going along here." },
+
+      { nl: "Laten we de ... proberen.", en: "Let's try the ..." },
+      { nl: "Wat dacht je van dit / dat idee?", en: "How's this / that for an idea?" },
+      { nl: "Ik heb een idee!", en: "I've got an idea!" },
+      { nl: "Hoe zou je het vinden om ... ?", en: "How do you fancy ... ?" },
+      { nl: "Wat dacht je van ... ?", en: "How about ... ?" },
+      { nl: "Waarom gaan we niet met z'n allen ... ?", en: "Why don't we all ... ?" },
+      { nl: "Willen jullie allebei ... ?", en: "Do you both want to ... ?" },
+
+      { nl: "Hoe krijgen we Joe hier?", en: "How are we going to get Joe there?" },
+      { nl: "Laten we daar afspreken om ...", en: "Let's meet there at ..." },
+      { nl: "Zeg tegen Joe dat hij ...", en: "Tell Joe to ..." },
+      { nl: "Kom om zeven uur.", en: "Come at 7 pm." },
+
+      { nl: "Ik zou je niet kunnen vertellen of het een duur restaurant is.", en: "I couldn't tell you if it's an expensive restaurant." },
+      { nl: "We zouden in plaats daarvan de Noodle Bar kunnen proberen!", en: "We could try the Noodle Bar instead!" },
+      { nl: "We kunnen met z'n allen Happy Birthday voor hem zingen!", en: "We can all sing Happy Birthday to him!" },
+      { nl: "Ik kan niet te veel mensen uitnodigen - ik heb een beperkt budget.", en: "I can't invite too many people – I'm on a budget." },
+      { nl: "Moet ik een tafel reserveren?", en: "Should I book a table?" },
+      { nl: "We moeten hem er niets over vertellen.", en: "We shouldn't tell him about it." },
+      { nl: "Ik denk dat we hem mee moeten nemen naar ...", en: "I think we should take him to ..." },
+      { nl: "Hoeveel vrienden zullen we uitnodigen?", en: "How many friends should we invite?" },
+      { nl: "We moeten eigenlijk Aryan vragen of hij ook wil komen ...", en: "We should ask Aryan if he wants to come, too ..." },
+      { nl: "Ik zou dit eigenlijk niet moeten zeggen, maar ...", en: "I shouldn't say this, but ..." },
+
+      { nl: "Bekijk het menu eens.", en: "Have a look at the menu." },
+      { nl: "Bestel voor mij maar een ..., alsjeblieft.", en: "Order a ... for me, please." },
+      { nl: "Ga zitten! / Neem plaats!", en: "Take a seat!" },
+
+      { nl: "Luister!", en: "Listen!" },
+      { nl: "Pardon, ...", en: "Excuse me, ..." },
+
+      { nl: "Kan ik je / u helpen?", en: "Can I help you?" },
+      { nl: "Ik zou graag een ... willen.", en: "I'd like a ... please." },
+      { nl: "Wil(t) je / u daar (een) ... bij?", en: "Would you like a ... with that?" },
+      { nl: "Was dat alles? / Anders nog iets?", en: "Will that be all?" },
+      { nl: "Dat is alles. / Dat was het, bedankt.", en: "That's all, thanks." },
+      { nl: "Hoeveel is het, alles bij elkaar?", en: "How much does that come to?" },
+
+      { nl: "Wat moeten we doen?", en: "What do we need to do?" },
+      { nl: "Eerst snijd je de kip en de groenten.", en: "First, you chop the chicken and the vegetables." },
+      { nl: "Daarna bak je de kip, voeg de groenten toe.", en: "Next, you fry the chicken, add the vegetables." },
+      { nl: "Dan giet je de sojasaus erbij.", en: "Then pour in the soy sauce." },
+      { nl: "Hoe kook je rijst?", en: "How do you cook rice?" },
+      { nl: "Zodra het water kookt, voeg je de rijst toe.", en: "When the water is boiling, add the rice." }
+    ];
+
+    let difficultPhrases = [];
+    let currentList = [...allPhrases];
+    let idx = 0;
+    let isEnToNl = false;
+    let filterOn = false;
+    let sortMode = 'std';
+
+    const card = document.getElementById('card-element');
+    const textFront = document.getElementById('text-front');
+    const textBack = document.getElementById('text-back');
+    const prog = document.getElementById('progress');
+
+    function load() {
+      const saved = JSON.parse(localStorage.getItem('eng_phrases_u45_v1') || '{}');
+      if (saved.diffIndices) difficultPhrases = saved.diffIndices.map(i => allPhrases[i]).filter(Boolean);
+      if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, currentList.length - 1);
+      if (saved.isEnToNl !== undefined) isEnToNl = saved.isEnToNl;
+    }
+
+    function save() {
+      localStorage.setItem('eng_phrases_u45_v1', JSON.stringify({
+        diffIndices: difficultPhrases.map(w => allPhrases.indexOf(w)),
+        lastIdx: idx,
+        isEnToNl
+      }));
+    }
+
+    function update() {
+      if (!currentList.length) return;
+      card.classList.remove('is-flipped');
+      const item = currentList[idx];
+      if (isEnToNl) {
+        textFront.textContent = item.en;
+        textBack.textContent = item.nl;
+        document.getElementById('label-front').textContent = 'Engels';
+        document.getElementById('label-back').textContent = 'Nederlands';
+        document.getElementById('lang-btn').textContent = '🔄 NL ➔ EN';
+      } else {
+        textFront.textContent = item.nl;
+        textBack.textContent = item.en;
+        document.getElementById('label-front').textContent = 'Nederlands';
+        document.getElementById('label-back').textContent = 'Engels';
+        document.getElementById('lang-btn').textContent = '🔄 EN ➔ NL';
+      }
+      prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+      card.classList.toggle('is-marked', difficultPhrases.includes(item));
+      document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultPhrases.length})`;
+      save();
+    }
+
+    function flip() { card.classList.toggle('is-flipped'); }
+    function next() { idx = (idx + 1) % currentList.length; update(); }
+    function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+    function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+    function toggleLang() { isEnToNl = !isEnToNl; update(); }
+    function mark() {
+      const item = currentList[idx];
+      if (!difficultPhrases.includes(item)) difficultPhrases.push(item);
+      else difficultPhrases = difficultPhrases.filter(w => w !== item);
+      update();
+    }
+    function toggleFilter() {
+      filterOn = !filterOn;
+      currentList = filterOn ? [...difficultPhrases] : [...allPhrases];
+      if (currentList.length === 0 && filterOn) {
+        alert('Geen moeilijke zinnen!');
+        filterOn = false;
+        currentList = [...allPhrases];
+      }
+      idx = 0;
+      update();
+    }
+    function speak() {
+      const item = currentList[idx];
+      const utterance = new SpeechSynthesisUtterance(item.en);
+      utterance.lang = 'en-GB';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
+    function closeList() { document.getElementById('list-modal').style.display = 'none'; }
+    function setSort(m) {
+      sortMode = m;
+      document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
+      document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
+      renderList();
+    }
+
+    function renderList() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const container = document.getElementById('list-container');
+      container.innerHTML = '';
+      let list = allPhrases.map((w, i) => ({ ...w, origIdx: i }));
+      if (sortMode === 'diff') {
+        list.sort((a, b) => difficultPhrases.includes(allPhrases[b.origIdx]) - difficultPhrases.includes(allPhrases[a.origIdx]));
+      }
+      list.forEach(w => {
+        if (w.nl.toLowerCase().includes(q) || w.en.toLowerCase().includes(q)) {
+          const div = document.createElement('div');
+          div.className = 'word-item';
+          div.innerHTML = `<div><div class="nl">${w.nl}</div><div class="en">${w.en}</div></div><span>${difficultPhrases.includes(allPhrases[w.origIdx]) ? '★' : ''}</span>`;
+          div.onclick = () => {
+            filterOn = false;
+            currentList = [...allPhrases];
+            idx = w.origIdx;
+            update();
+            closeList();
+          };
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function resetProgress() {
+      if (confirm('Wis voortgang?')) {
+        localStorage.removeItem('eng_phrases_u45_v1');
+        location.reload();
+      }
+    }
+
+    load();
+    update();
+  </script>
+</body>
+</html>

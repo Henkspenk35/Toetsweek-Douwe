@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nederlands Begrippen - Flashcards</title>
+    <style>
+        :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+
+        .scene { width: 100%; max-width: 380px; height: 260px; perspective: 1000px; margin: 20px 0; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; }
+        .card-front { color: var(--primary); font-size: 1.45rem; font-weight: 800; }
+        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); font-size: 1.15rem; }
+
+        .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.5; letter-spacing: 1px; }
+        .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+        .is-marked .star { display: block; }
+        .is-marked .card-face { border: 3px solid var(--orange); }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+        button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+        .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+        .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+        .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+
+        #list-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; }
+        .word-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .word-item .term { font-weight: bold; color: var(--primary); }
+        .word-item .def { color: #666; margin-top: 4px; }
+        .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+        .sort-bar button { flex: 1; padding: 8px; font-size: 0.75rem; background: #eee; }
+        .sort-bar button.active { background: var(--primary); color: white; }
+        .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+        .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+    </style>
+</head>
+<body>
+
+    <h3 style="color: var(--primary); margin-top: 10px;">Nederlands – Begrippen & Theorie</h3>
+
+    <div class="scene" onclick="flip()">
+        <div class="card" id="card-element">
+            <div class="card-face card-front">
+                <div class="star">★</div>
+                <div class="label" id="label-front">Begrip / vraag</div>
+                <div id="text-front">...</div>
+            </div>
+            <div class="card-face card-back">
+                <div class="label" id="label-back">Antwoord / uitleg</div>
+                <div id="text-back">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prev()">⬅️ Vorige</button>
+        <button onclick="next()">Volgende ➡️</button>
+        <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+        <button onclick="shuffle()">🔀 Husselen</button>
+        <button id="lang-btn" onclick="toggleLang()">🔄 Vraag ➔ Antwoord</button>
+        <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+        <button class="btn-blue" onclick="openList()">📋 Begrippenlijst & Zoeken</button>
+        <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+    </div>
+
+    <div class="progress" id="progress">Kaart 1 van ...</div>
+
+    <div id="list-modal">
+        <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+            <input type="text" class="search-box" id="search-input" placeholder="Zoek begrip of uitleg..." oninput="renderList()">
+            <div class="sort-bar">
+                <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+                <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+            </div>
+        </div>
+        <div id="list-container"></div>
+        <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+    </div>
+
+    <script>
+        const csvData = `Wat is fictie?,Alles wat verzonnen is, zoals leesboeken, strips, films, toneelstukken en gedichten.
+Wat is non-fictie?,Alles wat niet verzonnen is, zoals schoolboeken, nieuwsberichten, woordenboeken en reisgidsen.
+Waarom lees je fictie?,Vooral voor je plezier, maar je leert er soms ook van.
+Waarom lees je non-fictie?,Vooral om iets te weten te komen.
+Wat is realistische fictie?,Fictie die net echt is en echt zou kunnen gebeuren.
+Wat is niet-realistische fictie?,Fictie die niet waar kan zijn, zoals sprookjes en fantasy.
+Wat is een hoofdpersoon?,De belangrijkste persoon in een verhaal.
+Wat kom je over de hoofdpersoon te weten?,Wat hij denkt en voelt, zijn karaktereigenschappen, hoe hij eruitziet en wat zijn leefomstandigheden zijn.
+Wat zijn karaktereigenschappen?,Eigenschappen van een personage, bijvoorbeeld verlegen, nieuwsgierig, driftig, zelfstandig of egoïstisch.
+Wat is een bijpersoon?,Een minder belangrijk personage in het verhaal.
+Wat weet je meestal niet van een bijpersoon?,Je krijgt meestal niet zijn gedachten en gevoelens te lezen.
+Wat is sympathie voor een personage?,Dat je een personage aardig vindt en met hem meeleeft.
+Wat is antipathie voor een personage?,Dat je een hekel hebt aan een personage.
+Waarom voel je vaak sympathie voor de hoofdpersoon?,Omdat je leest wat de hoofdpersoon denkt en voelt.
+Wat is karakterontwikkeling?,Dat een personage in de loop van het verhaal verandert in denken, doen of zeggen.
+Wat is een round character?,Een personage met meerdere eigenschappen dat niet steeds op dezelfde manier reageert.
+Wie is meestal een round character?,De hoofdpersoon.
+Wat is een flat character?,Een personage met weinig eigenschappen of zelfs maar één eigenschap, waardoor het voorspelbaar reageert.
+Wie is meestal een flat character?,Een bijpersoon.
+Wat is spanning in een verhaal?,Dat je nieuwsgierig wordt en steeds verder wilt lezen.
+Wat is een spanningsvraag?,Een vraag in het verhaal waarop je het antwoord wilt weten.
+Geef een voorbeeld van een spanningsvraag.,Wie heeft het gedaan? of Krijgen ze elkaar?
+Wat is de ontknoping?,Het antwoord op de spanningsvraag.
+Wat is een cliffhanger?,Als een hoofdstuk op een heel spannend moment eindigt.
+Wat is een argument?,Een reden waarmee je je mening uitlegt of iemand probeert te overtuigen.
+Waarom gebruik je argumenten bij fictie?,Om uit te leggen waarom je iets van een boek of verhaal vindt.
+Waar kunnen argumenten over gaan?,Over of een verhaal realistisch is, spannend is, origineel is, bijzonder verteld is of of je meeleeft met de personages.
+Wanneer is een argument goed?,Als het duidelijk en overtuigend is en je voorbeelden of uitleg geeft.
+Wat is het verschil tussen fictie en non-fictie?,Fictie is verzonnen en non-fictie niet.
+Wat is het verschil tussen een hoofd- en bijpersoon?,Een hoofdpersoon is belangrijker en je komt veel meer over hem te weten.
+Wat is het verschil tussen een round en flat character?,Een round character verandert of heeft meerdere kanten; een flat character blijft simpel en voorspelbaar.
+Waarom maakt een schrijver een personage sympathiek?,Zodat de lezer met dat personage meeleeft.
+Wat doet een cliffhanger met de lezer?,Die maakt de lezer extra nieuwsgierig naar het vervolg.
+Waarom is spanning belangrijk?,Omdat je daardoor verder wilt lezen.
+Wat betekent meeleven met een personage?,Dat je betrokken raakt bij wat het personage denkt, voelt en meemaakt.
+Wat betekent realistisch?,Dat het echt zou kunnen gebeuren.
+Wat betekent origineel?,Dat iets nieuw, opvallend of niet afgezaagd is.
+Wat betekent ontknoping letterlijk in een verhaal?,Het moment waarop duidelijk wordt hoe het afloopt.
+Waarom is non-fictie vaak realistisch?,Omdat het over echte dingen, feiten of informatie gaat.`;
+
+        const allWords = csvData.trim().split('\n').map(line => {
+            const firstComma = line.indexOf(',');
+            const secondComma = line.indexOf(',', firstComma + 1);
+
+            if (firstComma !== -1 && secondComma !== -1) {
+                return {
+                    term: line.slice(0, firstComma).trim(),
+                    def: line.slice(firstComma + 1, secondComma).trim(),
+                    extra: line.slice(secondComma + 1).trim()
+                };
+            } else {
+                const parts = line.split(',');
+                return {
+                    term: parts[0]?.trim() || '',
+                    def: parts.slice(1).join(',').trim() || '',
+                    extra: ''
+                };
+            }
+        }).filter(w => w.term && w.def).map(w => ({
+            front: w.term,
+            back: w.extra ? `${w.def} ${w.extra}` : w.def
+        }));
+
+        let difficultWords = [];
+        let currentList = [...allWords];
+        let idx = 0;
+        let reverseMode = false;
+        let filterOn = false;
+        let sortMode = 'std';
+
+        const card = document.getElementById('card-element');
+        const textFront = document.getElementById('text-front');
+        const textBack = document.getElementById('text-back');
+        const prog = document.getElementById('progress');
+
+        function load() {
+            const saved = JSON.parse(localStorage.getItem('nederlands_begrippen_v1') || '{}');
+            if (saved.diffIndices) difficultWords = saved.diffIndices.map(i => allWords[i]).filter(Boolean);
+            if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, Math.max(currentList.length - 1, 0));
+        }
+
+        function save() {
+            localStorage.setItem('nederlands_begrippen_v1', JSON.stringify({
+                diffIndices: difficultWords.map(w => allWords.indexOf(w)),
+                lastIdx: idx
+            }));
+        }
+
+        function update() {
+            if (currentList.length === 0) return;
+
+            card.classList.remove('is-flipped');
+            const item = currentList[idx];
+
+            if (!reverseMode) {
+                textFront.textContent = item.front;
+                textBack.textContent = item.back;
+                document.getElementById('label-front').textContent = "Begrip / vraag";
+                document.getElementById('label-back').textContent = "Antwoord / uitleg";
+            } else {
+                textFront.textContent = item.back;
+                textBack.textContent = item.front;
+                document.getElementById('label-front').textContent = "Antwoord / uitleg";
+                document.getElementById('label-back').textContent = "Begrip / vraag";
+            }
+
+            prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+            card.classList.toggle('is-marked', difficultWords.includes(item));
+            document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultWords.length})`;
+            document.getElementById('lang-btn').textContent = reverseMode ? "🔄 Antwoord ➔ Vraag" : "🔄 Vraag ➔ Antwoord";
+            save();
+        }
+
+        function flip() { card.classList.toggle('is-flipped'); }
+        function next() { idx = (idx + 1) % currentList.length; update(); }
+        function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+        function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+        function toggleLang() { reverseMode = !reverseMode; update(); }
+
+        function mark() {
+            const item = currentList[idx];
+            if (!difficultWords.includes(item)) difficultWords.push(item);
+            else difficultWords = difficultWords.filter(w => w !== item);
+            update();
+        }
+
+        function toggleFilter() {
+            filterOn = !filterOn;
+            currentList = filterOn ? [...difficultWords] : [...allWords];
+            if (currentList.length === 0 && filterOn) {
+                alert("Geen moeilijke kaarten geselecteerd.");
+                filterOn = false;
+                currentList = [...allWords];
+            }
+            idx = 0;
+            update();
+        }
+
+        function openList() {
+            document.getElementById('list-modal').style.display = 'block';
+            renderList();
+        }
+
+        function closeList() {
+            document.getElementById('list-modal').style.display = 'none';
+        }
+
+        function setSort(m) {
+            sortMode = m;
+            document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
+            document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
+            renderList();
+        }
+
+        function renderList() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+
+            let list = allWords.map((w, i) => ({ ...w, origIdx: i }));
+
+            if (sortMode === 'diff') {
+                list.sort((a, b) => difficultWords.includes(allWords[b.origIdx]) - difficultWords.includes(allWords[a.origIdx]));
+            }
+
+            list.forEach(w => {
+                if (
+                    w.front.toLowerCase().includes(q) ||
+                    w.back.toLowerCase().includes(q)
+                ) {
+                    const div = document.createElement('div');
+                    div.className = 'word-item';
+                    div.innerHTML = `
+                        <div>
+                            <div class="term">${w.front}</div>
+                            <div class="def">${w.back}</div>
+                        </div>
+                        <span>${difficultWords.includes(allWords[w.origIdx]) ? '★' : ''}</span>
+                    `;
+                    div.onclick = () => {
+                        filterOn = false;
+                        currentList = [...allWords];
+                        idx = w.origIdx;
+                        update();
+                        closeList();
+                    };
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm("Wis voortgang?")) {
+                localStorage.removeItem('nederlands_begrippen_v1');
+                location.reload();
+            }
+        }
+
+        load();
+        update();
+    </script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Biologie Thema 4 - Flashcards</title>
+    <style>
+        :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+
+        .scene { width: 100%; max-width: 380px; height: 260px; perspective: 1000px; margin: 20px 0; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; }
+        .card-front { color: var(--primary); font-size: 1.35rem; font-weight: 800; }
+        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); font-size: 1.06rem; line-height: 1.35; }
+
+        .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.5; letter-spacing: 1px; }
+        .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+        .is-marked .star { display: block; }
+        .is-marked .card-face { border: 3px solid var(--orange); }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 380px; }
+        button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+        .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+        .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+        .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+
+        #list-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; }
+        .word-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .word-item .term { font-weight: bold; color: var(--primary); }
+        .word-item .def { color: #666; margin-top: 4px; }
+        .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+        .sort-bar button { flex: 1; padding: 8px; font-size: 0.75rem; background: #eee; }
+        .sort-bar button.active { background: var(--primary); color: white; }
+        .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+        .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+    </style>
+</head>
+<body>
+
+    <h3 style="color: var(--primary); margin-top: 10px;">Biologie – Thema 4 Stevigheid en Beweging</h3>
+    <div style="max-width: 380px; color: #7f8c8d; font-size: 0.82rem; text-align: center;">Samenvatting in flashcards. Het skelet-overzicht met alle botnamen is bewust weggelaten.</div>
+
+    <div class="scene" onclick="flip()">
+        <div class="card" id="card-element">
+            <div class="card-face card-front">
+                <div class="star">★</div>
+                <div class="label" id="label-front">Begrip / vraag</div>
+                <div id="text-front">...</div>
+            </div>
+            <div class="card-face card-back">
+                <div class="label" id="label-back">Antwoord / uitleg</div>
+                <div id="text-back">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prev()">⬅️ Vorige</button>
+        <button onclick="next()">Volgende ➡️</button>
+        <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+        <button onclick="shuffle()">🔀 Husselen</button>
+        <button id="lang-btn" onclick="toggleLang()">🔄 Vraag ➔ Antwoord</button>
+        <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+        <button class="btn-blue" onclick="openList()">📋 Begrippenlijst & Zoeken</button>
+        <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+    </div>
+
+    <div class="progress" id="progress">Kaart 1 van ...</div>
+
+    <div id="list-modal">
+        <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+            <input type="text" class="search-box" id="search-input" placeholder="Zoek begrip of uitleg..." oninput="renderList()">
+            <div class="sort-bar">
+                <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+                <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+            </div>
+        </div>
+        <div id="list-container"></div>
+        <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+    </div>
+
+    <script>
+        const csvData = `Wat zijn de delen van het lichaam?,Hoofd romp en ledematen.
+Wat zijn ledematen?,Armen en benen.
+Waaruit bestaat het skelet?,Uit botten of beenderen.
+Wat zijn de vier functies van het skelet?,Stevigheid geven beweging mogelijk maken bescherming bieden aan kwetsbare organen en vorm geven aan het lichaam.
+Wat heeft de vorm van het skelet en de botten met de functie te maken?,De vorm past bij wat het bot of skeletdeel moet doen.
+Wat zit er in botten?,Beenmerg.
+Waar zit rood beenmerg?,In de koppen van pijpbeenderen en in platte beenderen.
+Wat gebeurt er in rood beenmerg?,Daar ontstaan bloedcellen.
+Waar zit geel beenmerg?,In de mergholte van pijpbeenderen.
+Wat bevat geel beenmerg?,Vet.
+Hoe is kraakbeenweefsel?,Stevig en heel buigzaam.
+Hoe liggen kraakbeencellen?,In groepjes bij elkaar in elastische tussencelstof.
+Wat bevat kraakbeen veel?,Collageen of lijmstof.
+Hoe is botweefsel?,Heel stevig en een beetje buigzaam.
+Hoe liggen botcellen?,In de tussencelstof in kringen rondom kanaaltjes.
+Waardoor krijgt bot stevigheid?,Door kalkzouten in de tussencelstof.
+Wat gebeurt er met kalkzouten in zoutzuur?,Die lossen op.
+Waardoor krijgt bot buigzaamheid?,Door collageen of lijmstof in de tussencelstof.
+Wat gebeurt er met lijmstof in een vlam?,Die verbrandt.
+Hoe verandert de samenstelling van botten tijdens het leven?,De hoeveelheid lijmstof neemt af en de hoeveelheid kalkzouten neemt toe.
+Waaruit bestaan botten van baby's vooral?,Vooral uit kraakbeenweefsel.
+Wat zijn fontanellen?,Ruimten tussen de schedelbeenderen van baby's.
+Wat gebeurt er met kraakbeenweefsel als je ouder wordt?,Het verandert in botweefsel.
+Wat gebeurt er met de fontanellen?,Die groeien dicht.
+Hoe is botweefsel bij kinderen?,Met veel lijmstof en weinig kalk.
+Hoe is botweefsel bij ouderen?,Met weinig lijmstof en veel kalk.
+Waar zit bij volwassenen kraakbeen?,In de oorschelp in de neus tussen de ribben en het borstbeen en tussen de wervels van de wervelkolom.
+Welke beenverbindingen maken geen beweging mogelijk?,Vergroeide verbindingen en naden.
+Wat is een voorbeeld van een vergroeide verbinding?,Tussen heiligbeen en staartbeen.
+Wat is een voorbeeld van een naad?,Tussen de schedelbeenderen.
+Welke beenverbinding maakt een beetje beweging mogelijk?,Kraakbeenverbinding.
+Waar zit een kraakbeenverbinding?,Bijvoorbeeld tussen de ribben en het borstbeen.
+Welke beenverbinding maakt veel beweging mogelijk?,Een gewricht.
+Waar zitten gewrichten?,Bijvoorbeeld tussen de botten van de hand.
+Wat draait er bij een gewricht?,De gewrichtskogel draait in de gewrichtskom.
+Wat doen kraakbeenlaagjes in een gewricht?,Ze gaan slijtage tegen en maken de beweging soepeler.
+Wat doet het gewrichtskapsel?,Het houdt de botten op hun plaats en geeft gewrichtssmeer af.
+Wat doet gewrichtssmeer?,Daardoor kunnen de botten soepel bewegen.
+Wat doen kapselbanden?,Extra versteviging van een gewricht.
+Wat doet een kogelgewricht?,Daarmee is draaiende beweging mogelijk.
+Wat zijn voorbeelden van een kogelgewricht?,Schoudergewricht en heupgewricht.
+Wat doet een rolgewricht?,Het ene bot draait in de lengteas om het andere bot.
+Wat is een voorbeeld van een rolgewricht?,Spaakbeen en ellepijp.
+Wat doet een scharniergewricht?,Alleen beweging heen en terug.
+Wat zijn voorbeelden van een scharniergewricht?,Ellebooggewricht en kniegewricht.
+Wat hoort bij het spierstelsel?,Alle skeletspieren samen.
+Waar zitten skeletspieren mee vast aan botten?,Met pezen.
+Wat is de aanhechtingsplaats?,De plaats waar een spier aan een bot vastzit.
+Wat zijn pezen?,De uitlopers van de spierschede.
+Waaruit bestaan skeletspieren?,Uit meerdere spierbundels die elk uit spiervezels bestaan.
+Hoe bewegen spieren een bot?,Door samen te trekken.
+Wat gebeurt er als een spier samentrekt?,De spier wordt korter en dikker.
+Wat gebeurt er met de botten als een spier samentrekt?,De spier trekt de botten naar elkaar toe.
+Waar hangen kracht en snelheid van samentrekken van af?,Van het aantal spiervezels dat samentrekt.
+Wat is een antagonistisch paar?,Twee spieren met een tegengestelde werking.
+Noem een voorbeeld van een antagonistisch paar.,Biceps en triceps.
+Welke twee typen spierweefsel worden genoemd?,Dwarsgestreept spierweefsel en glad spierweefsel.
+Waar komt dwarsgestreept spierweefsel voor?,In skeletspieren.
+Hoe ontstaan de streepjes in dwarsgestreept spierweefsel?,Door overlap van eiwitten.
+Hoe werkt dwarsgestreept spierweefsel?,Het kan snel en krachtig samentrekken maar raakt snel vermoeid.
+Waar komt glad spierweefsel voor?,In orgaanspieren.
+Hoe ziet glad spierweefsel eruit?,Het bestaat uit langwerpige spiercellen.
+Hoe werkt glad spierweefsel?,Het trekt langzaam en minder krachtig samen maar raakt niet snel vermoeid.
+Wat is bijzonder aan hartspierweefsel?,Het heeft kenmerken van dwarsgestreept en van glad spierweefsel.
+Hoe werkt hartspierweefsel?,Het is dwarsgestreept maar raakt niet snel vermoeid.
+Welke typen spiervezels zijn er in dwarsgestreept spierweefsel?,Snelle en langzame spiervezels.
+Hoe werken snelle spiervezels?,Ze kunnen snel en krachtig samentrekken maar raken snel vermoeid.
+Hoe werken langzame spiervezels?,Ze raken niet snel vermoeid maar kunnen minder kracht zetten.
+Wat zijn bewuste spierbewegingen?,Bewegingen met skeletspieren waar je zelf controle over hebt.
+Wat zijn onbewuste spierbewegingen?,Bewegingen van spieren in je organen zonder dat je je daar bewust van bent.
+Noem voorbeelden van onbewuste spierbewegingen.,Spieren in maag en darmen hart en huidspiertjes.
+Wat is de dubbele-S-vorm?,De vorm van de wervelkolom.
+Hoe zijn de wervels met elkaar verbonden?,Door tussenwervelschijven.
+Wat is een tussenwervelschijf?,Een geleiachtige kern omgeven door kraakbeen.
+Wat is lichaamshouding?,De manier waarop je staat en zit.
+Hoe ziet een goede lichaamshouding eruit?,De wervelkolom heeft een dubbele-S-vorm.
+Hoe ziet een goede zithouding eruit?,Je armen en benen maken een rechte hoek.
+Wat is een bochel?,Een kromme rug.
+Waardoor kan een bochel ontstaan?,Door veel omlaag kijken op beeldschermen.
+Hoe gebruik je een beeldscherm goed?,Houd je hoofd rechtop gebruik het scherm niet langer dan een halfuur achter elkaar ga op je buik liggen bij lezen tv-kijken gamen en telefoongebruik en ga voor op de stoel zitten met één voet naar achteren.
+Wat kun je met goed tillen voorkomen?,Rugklachten.
+Wat gebeurt er met spieren door training?,Spieren worden dikker als je ze vaak gebruikt.
+Wat zijn twee voordelen van sterkere spieren?,Je kunt meer kracht uitoefenen en je krijgt minder snel een blessure.
+Waardoor ontstaat spierpijn volgens de samenvatting?,Doordat afvalstoffen achterblijven in de spieren.
+Hoe kun je spierpijn helpen voorkomen?,Met warming-up rekoefeningen en coolingdown.
+Wat vermindert de kans op spierpijn?,Door vaker te trainen.
+Waarom is lichaamsbeweging goed voor je gezondheid?,Het geeft ontspanning geeft een betere conditie en helpt klachten te voorkomen.
+Hoe ondersteunt lichaamsbeweging de motorische ontwikkeling?,De coördinatie verbetert en snelheid en nauwkeurigheid van bewegingen verbeteren.
+Wat is motorisch geheugen?,De juiste coördinatie van een beweging zonder dat je je spieren bewust aanstuurt.
+Noem een voorbeeld van motorisch geheugen.,Fietsen.
+Waar staat RSI voor?,Repetitive strain injury.
+Wat is RSI?,Een blessure door herhaalde beweging.
+Waar kun je pijn hebben bij RSI?,In schouder arm nek en of hoofd.
+Hoe begint RSI vaak?,Met tintelingen vermoeidheid en gevoeligheid.
+Hoe verklein je de kans op RSI-klachten?,Door regelmatig te bewegen en een goede houding aan te nemen.
+Wat is het verband tussen vorm en functie van botten?,Verschillen in vorm hangen samen met verschillen in leefwijze en functie.
+Hoe lijken het skelet van zoogdieren en mensen op elkaar?,Er zijn veel overeenkomsten.
+Noem een verschil tussen veel zoogdieren en mensen in het skelet.,Bij veel zoogdieren ontbreken bepaalde botten zoals de knieschijf.
+Waarmee heeft de vorm van de poten van een dier te maken?,Met de voortbeweging van het dier.
+Wat zijn zoolgangers?,Dieren die op de hele voetzool lopen.
+Noem voorbeelden van zoolgangers.,Beren en mensen.
+Wat zijn teengangers?,Dieren die op de tenen lopen.
+Noem voorbeelden van teengangers.,Katten.
+Wat zijn topgangers of hoefgangers?,Dieren die op de toppen van de tenen lopen.
+Noem voorbeelden van topgangers of hoefgangers.,Paarden.
+Hoe is de onderkant van je voeten gevormd?,Gewelfd of gebogen.
+Waarom is de onderkant van je voeten gewelfd?,Daardoor kunnen je voeten beter gewicht dragen.
+Wat is een blessure?,Beschadiging aan spieren botten of gewrichten.
+Noem oorzaken van blessures.,Ruwheid ongetraind zijn oververmoeidheid overbelasting slecht weer en slechte sportuitrusting.
+Wat is een spierscheuring?,Een beschadiging van een spier.
+Wat veroorzaakt een spierscheuring?,Te sterke inspanning of een plotselinge beweging.
+Wat is een botbreuk?,Een bot breekt in twee of meer delen.
+Wat is zetten van een bot?,De delen van het gebroken bot in de goede stand brengen.
+Wat gebeurt er daarna met een botbreuk?,De delen van het bot groeien weer aan elkaar.
+Wat is voetbalknie?,In het kniegewricht is een meniscus beschadigd.
+Hoe ontstaat een voetbalknie?,Bijvoorbeeld door een draaibeweging van het lichaam terwijl het onderbeen blijft staan.
+Hoe wordt een beschadigde meniscus vaak behandeld?,Vaak operatief.
+Wat is een kneuzing?,Beschadiging van weefsel door een val duw stomp of trap.
+Wat is een blauwe plek?,Inwendige bloeding.
+Wat is een zwelling?,Ophoping van vocht.
+Wat helpt bij een zwelling?,Koelen kan de zwelling tegengaan en de pijn verminderen.
+Wat is een verzwikking?,Een kneuzing van het gewricht met beschadiging van gewrichtskapsel en kapselbanden.
+Wat is een voorbeeld van een verzwikking?,Een verzwikte enkel.
+Wat kan er gebeuren bij een ernstige verzwikking?,Het gewrichtskapsel en de kapselbanden kunnen scheuren.
+Wat is een ontwrichting?,De gewrichtskogel is uit de gewrichtskom geraakt.
+Wat is een voorbeeld van een ontwrichting?,Elleboog uit de kom.
+Wat zijn ontstekingen van aanhechtingsplaatsen van spieren?,Bijvoorbeeld een tenniselleboog.
+Wat is een oorzaak van een tenniselleboog?,Overbelasting en herhaalde bewegingen.
+Wat moet je kunnen bij onderzoeken en practica?,Nauwkeurig metingen uitvoeren resultaten weergeven in een staafdiagram lijndiagram of cirkeldiagram beoordelen welk type diagram geschikt is en een werkplan maken voor een onderzoek.`;
+
+        const allWords = csvData.trim().split('\n').map(line => {
+            const firstComma = line.indexOf(',');
+            return {
+                front: line.slice(0, firstComma).trim(),
+                back: line.slice(firstComma + 1).trim()
+            };
+        }).filter(w => w.front && w.back);
+
+        let difficultWords = [];
+        let currentList = [...allWords];
+        let idx = 0;
+        let reverseMode = false;
+        let filterOn = false;
+        let sortMode = 'std';
+
+        const card = document.getElementById('card-element');
+        const textFront = document.getElementById('text-front');
+        const textBack = document.getElementById('text-back');
+        const prog = document.getElementById('progress');
+
+        function load() {
+            const saved = JSON.parse(localStorage.getItem('biologie_thema4_v1') || '{}');
+            if (saved.diffIndices) difficultWords = saved.diffIndices.map(i => allWords[i]).filter(Boolean);
+            if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, Math.max(currentList.length - 1, 0));
+        }
+
+        function save() {
+            localStorage.setItem('biologie_thema4_v1', JSON.stringify({
+                diffIndices: difficultWords.map(w => allWords.indexOf(w)),
+                lastIdx: idx
+            }));
+        }
+
+        function update() {
+            if (currentList.length === 0) return;
+            card.classList.remove('is-flipped');
+            const item = currentList[idx];
+
+            if (!reverseMode) {
+                textFront.textContent = item.front;
+                textBack.textContent = item.back;
+                document.getElementById('label-front').textContent = "Begrip / vraag";
+                document.getElementById('label-back').textContent = "Antwoord / uitleg";
+            } else {
+                textFront.textContent = item.back;
+                textBack.textContent = item.front;
+                document.getElementById('label-front').textContent = "Antwoord / uitleg";
+                document.getElementById('label-back').textContent = "Begrip / vraag";
+            }
+
+            prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+            card.classList.toggle('is-marked', difficultWords.includes(item));
+            document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultWords.length})`;
+            document.getElementById('lang-btn').textContent = reverseMode ? "🔄 Antwoord ➔ Vraag" : "🔄 Vraag ➔ Antwoord";
+            save();
+        }
+
+        function flip() { card.classList.toggle('is-flipped'); }
+        function next() { idx = (idx + 1) % currentList.length; update(); }
+        function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+        function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+        function toggleLang() { reverseMode = !reverseMode; update(); }
+
+        function mark() {
+            const item = currentList[idx];
+            if (!difficultWords.includes(item)) difficultWords.push(item);
+            else difficultWords = difficultWords.filter(w => w !== item);
+            update();
+        }
+
+        function toggleFilter() {
+            filterOn = !filterOn;
+            currentList = filterOn ? [...difficultWords] : [...allWords];
+            if (currentList.length === 0 && filterOn) {
+                alert("Geen moeilijke kaarten geselecteerd.");
+                filterOn = false;
+                currentList = [...allWords];
+            }
+            idx = 0;
+            update();
+        }
+
+        function openList() {
+            document.getElementById('list-modal').style.display = 'block';
+            renderList();
+        }
+
+        function closeList() {
+            document.getElementById('list-modal').style.display = 'none';
+        }
+
+        function setSort(m) {
+            sortMode = m;
+            document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
+            document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
+            renderList();
+        }
+
+        function renderList() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+
+            let list = allWords.map((w, i) => ({ ...w, origIdx: i }));
+            if (sortMode === 'diff') {
+                list.sort((a, b) => difficultWords.includes(allWords[b.origIdx]) - difficultWords.includes(allWords[a.origIdx]));
+            }
+
+            list.forEach(w => {
+                if (w.front.toLowerCase().includes(q) || w.back.toLowerCase().includes(q)) {
+                    const div = document.createElement('div');
+                    div.className = 'word-item';
+                    div.innerHTML = `
+                        <div>
+                            <div class="term">${w.front}</div>
+                            <div class="def">${w.back}</div>
+                        </div>
+                        <span>${difficultWords.includes(allWords[w.origIdx]) ? '★' : ''}</span>
+                    `;
+                    div.onclick = () => {
+                        filterOn = false;
+                        currentList = [...allWords];
+                        idx = w.origIdx;
+                        update();
+                        closeList();
+                    };
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm("Wis voortgang?")) {
+                localStorage.removeItem('biologie_thema4_v1');
+                location.reload();
+            }
+        }
+
+        load();
+        update();
+    </script>
+</body>
+</html>
