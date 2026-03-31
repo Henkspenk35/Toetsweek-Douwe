@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Franse grammatica trainer U5</title>
+<style>
+:root{
+  --primary:#2c3e50; --blue:#3498db; --purple:#8e44ad; --orange:#f39c12; --bg:#f4f7f6; --line:#d8c6f0;
+}
+*{box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg); margin:0; color:var(--primary);
+}
+.wrap{max-width:760px; margin:0 auto; padding:18px;}
+h1{font-size:1.8rem; margin:6px 0 10px}
+.topnote{background:white; border-radius:18px; padding:14px 16px; box-shadow:0 4px 14px rgba(0,0,0,.06); margin-bottom:14px;}
+.tabs{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;}
+.tabs button,.controls button,.mini-btn{
+  border:none; border-radius:14px; padding:12px 10px; font-weight:700; cursor:pointer;
+  background:white; color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.tabs button.active{background:var(--primary); color:white;}
+.controls{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0;}
+.controls .wide{grid-column:span 2;}
+.controls .accent{background:var(--blue); color:white;}
+.controls .warn{background:var(--orange); color:white;}
+.scene{width:100%; min-height:380px; perspective:1000px; margin-top:10px;}
+.card{
+  width:100%; min-height:380px; position:relative; transition:transform .45s; transform-style:preserve-3d; cursor:pointer;
+}
+.card.is-flipped{transform:rotateY(180deg)}
+.face{
+  position:absolute; inset:0; backface-visibility:hidden; background:white; border-radius:24px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08); padding:22px; overflow:auto; border:1px solid #e7e7e7;
+}
+.back{transform:rotateY(180deg); background:#fcfbff;}
+.label{font-size:.72rem; text-transform:uppercase; opacity:.55; font-weight:700; letter-spacing:1px; margin-bottom:10px}
+.star{position:absolute; right:16px; top:12px; color:var(--orange); font-size:1.35rem; display:none}
+.marked .star{display:block}
+.marked .face{border:3px solid var(--orange)}
+.front-title{font-size:1.55rem; font-weight:900; line-height:1.15; margin-bottom:12px}
+.front-sub{font-size:1.06rem; line-height:1.45}
+.back h3{margin:.1rem 0 .5rem; font-size:1.3rem}
+.back h4{margin:.85rem 0 .3rem; font-size:1rem}
+.back ul{margin:.15rem 0 .8rem 1.1rem; padding:0}
+.back li{margin:.18rem 0; line-height:1.4}
+.back table{width:100%; border-collapse:collapse; margin:.5rem 0 .8rem}
+.back td,.back th{border:1px solid var(--line); padding:8px 10px; vertical-align:top; text-align:left}
+.back th{background:#efe2ff}
+.progress{margin-top:12px; font-weight:700; color:#667}
+.row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+.pill{background:#eef5fb; color:#28506b; border-radius:999px; padding:6px 10px; font-size:.88rem; font-weight:700}
+.searchmodal{
+  display:none; position:fixed; inset:0; background:white; z-index:20; overflow:auto; padding:16px;
+}
+.searchmodal.show{display:block}
+.searchbox{width:100%; border:1px solid #ddd; border-radius:12px; padding:14px; font-size:1rem;}
+.item{border-bottom:1px solid #eee; padding:14px 4px; cursor:pointer; display:flex; justify-content:space-between; gap:10px}
+.item strong{display:block; margin-bottom:4px}
+.close-floating{position:fixed; right:18px; bottom:18px; background:var(--primary); color:white; padding:14px 18px; border-radius:999px; border:none}
+.refbox{background:white; border-radius:18px; padding:14px 16px; box-shadow:0 4px 14px rgba(0,0,0,.06); margin-top:14px; display:none}
+.refbox.show{display:block}
+.small{font-size:.92rem; line-height:1.45}
+.examplebox{background:#f7f4fd; border-left:4px solid var(--purple); border-radius:12px; padding:10px 12px; margin:.65rem 0}
+.notebox{background:#fff6e6; border-left:4px solid var(--orange); border-radius:12px; padding:10px 12px; margin:.65rem 0}
+@media (max-width:600px){
+  .wrap{padding:16px;}
+  .controls{grid-template-columns:1fr 1fr}
+  .scene,.card{min-height:430px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Franse grammatica trainer U5</h1>
+  <div class="topnote small">
+    Zelfde opzet als je Engelse template: <strong>3 lagen</strong> —
+    <strong>regels</strong> (wat moet je weten), <strong>voorbeelden</strong> (wat moet je herkennen) en
+    <strong>toetsdrill</strong> (wat moet je actief kunnen reproduceren). Alles staat hieronder in één HTML.
+  </div>
+
+  <div class="tabs">
+    <button id="tab-rules" class="active" onclick="setMode('rules')">Regelkaarten</button>
+    <button id="tab-drill" onclick="setMode('drill')">Toetsdrill</button>
+    <button id="tab-ref" onclick="toggleReference()">Overzicht</button>
+  </div>
+
+  <div class="scene" onclick="flip()">
+    <div class="card" id="card">
+      <div class="face front">
+        <div class="star">★</div>
+        <div class="label" id="frontLabel">Regelkaart</div>
+        <div class="front-title" id="frontTitle">...</div>
+        <div class="front-sub" id="frontSub">...</div>
+      </div>
+      <div class="face back">
+        <div class="label" id="backLabel">Antwoord</div>
+        <div id="backContent">...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prev()">⬅️ Vorige</button>
+    <button onclick="next()">Volgende ➡️</button>
+    <button class="warn wide" onclick="mark()">❌ Ken ik nog niet</button>
+    <button onclick="shuffleDeck()">🔀 Husselen</button>
+    <button onclick="toggleFilter()" id="filterBtn">Focus op moeilijk (0)</button>
+    <button class="accent wide" onclick="openList()">📋 Lijst & zoeken</button>
+    <button class="wide" onclick="toggleDirection()" id="dirBtn">🔄 Normaal</button>
+    <button class="wide" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+  </div>
+
+  <div class="progress" id="progress">Kaart 1 van ...</div>
+
+  <div id="refbox" class="refbox small"></div>
+</div>
+
+<div id="listModal" class="searchmodal">
+  <input class="searchbox" id="searchInput" placeholder="Zoek onderwerp, regel of voorbeeld..." oninput="renderList()" />
+  <div id="listContainer"></div>
+  <button class="close-floating" onclick="closeList()">Sluiten ✕</button>
+</div>
+
+<script>
+const rules = [
+{
+  id:"aller",
+  title:"Aller — tegenwoordige tijd",
+  prompt:"Kun je de vormen van aller herkennen en reproduceren?",
+  answerHTML:`
+    <h3>aller = gaan</h3>
+    <table>
+      <tr><th>Frans</th><th>Nederlands</th></tr>
+      <tr><td>je vais</td><td>ik ga</td></tr>
+      <tr><td>tu vas</td><td>jij gaat</td></tr>
+      <tr><td>il / elle / on va</td><td>hij / zij / men gaat</td></tr>
+      <tr><td>nous allons</td><td>wij gaan</td></tr>
+      <tr><td>vous allez</td><td>jullie / u gaat</td></tr>
+      <tr><td>ils / elles vont</td><td>zij gaan</td></tr>
+    </table>
+    <div class="examplebox"><strong>Futur proche:</strong> na een vorm van <strong>aller</strong> kun je een heel werkwoord zetten om iets in de nabije toekomst uit te drukken.<br><br>
+    Demain, <strong>je vais jouer</strong> de la guitare.<br>
+    Cet après-midi, <strong>nous allons regarder</strong> la télé.</div>`
+},
+{
+  id:"vouloir",
+  title:"Vouloir — tegenwoordige tijd",
+  prompt:"Kun je de vormen van vouloir en het beleefde gebruik geven?",
+  answerHTML:`
+    <h3>vouloir = willen</h3>
+    <table>
+      <tr><th>Frans</th><th>Nederlands</th></tr>
+      <tr><td>je veux</td><td>ik wil</td></tr>
+      <tr><td>tu veux</td><td>jij wilt</td></tr>
+      <tr><td>il / elle / on veut</td><td>hij / zij / men wil</td></tr>
+      <tr><td>nous voulons</td><td>wij willen</td></tr>
+      <tr><td>vous voulez</td><td>jullie / u wilt</td></tr>
+      <tr><td>ils / elles veulent</td><td>zij willen</td></tr>
+    </table>
+    <div class="examplebox">Beleefd vragen: <strong>je voudrais</strong><br><br>
+    <strong>Je voudrais</strong> un coca, s'il vous plaît.</div>`
+},
+{
+  id:"adj-vorm",
+  title:"Bijvoeglijk naamwoord — vorm",
+  prompt:"Welke uitgangen komen erbij bij vrouwelijke en meervoudsvormen?",
+  answerHTML:`
+    <h3>De vorm van het bijvoeglijk naamwoord</h3>
+    <ul>
+      <li>Vrouwelijk → extra <strong>-e</strong></li>
+      <li>Meervoud → extra <strong>-s</strong></li>
+      <li>Vrouwelijk + meervoud → <strong>-es</strong></li>
+    </ul>
+    <table>
+      <tr><th>Situatie</th><th>Vorm</th><th>Voorbeeld</th></tr>
+      <tr><td>vrouwelijk</td><td>-e</td><td>une grande sœur</td></tr>
+      <tr><td>meervoud</td><td>-s</td><td>deux grands frères</td></tr>
+      <tr><td>vrouwelijk meervoud</td><td>-es</td><td>deux grandes sœurs</td></tr>
+    </table>
+    <div class="notebox">Eindigt een woord al op <strong>-e</strong>, dan komt er geen extra <strong>-e</strong> bij. Eindigt het al op <strong>-s</strong>, dan komt er geen extra <strong>-s</strong> bij.</div>
+    <div class="examplebox">une robe <strong>rouge</strong><br>deux garçons <strong>français</strong></div>`
+},
+{
+  id:"adj-plaats",
+  title:"Bijvoeglijk naamwoord — plaats",
+  prompt:"Waar staat het bijvoeglijk naamwoord meestal, en wat zijn de bekende uitzonderingen?",
+  answerHTML:`
+    <h3>Waar staat het bijvoeglijk naamwoord?</h3>
+    <ul>
+      <li><strong>Hoofdregel:</strong> de meeste bijvoeglijke naamwoorden staan <strong>achter</strong> het zelfstandig naamwoord.</li>
+    </ul>
+    <div class="examplebox">un film <strong>intéressant</strong><br>une voiture <strong>bleue</strong><br>deux filles <strong>françaises</strong></div>
+    <h4>Belangrijke uitzonderingen vóór het zelfstandig naamwoord</h4>
+    <table>
+      <tr><th>Frans</th><th>Nederlands</th><th>Voorbeeld</th></tr>
+      <tr><td>joli</td><td>mooi, leuk</td><td>une jolie fille</td></tr>
+      <tr><td>grand</td><td>groot</td><td>un grand acteur</td></tr>
+      <tr><td>petit</td><td>klein</td><td>une petite chambre</td></tr>
+      <tr><td>bon / bonne</td><td>goed, lekker</td><td>une bonne note</td></tr>
+      <tr><td>beau / belle</td><td>mooi</td><td>un beau chien</td></tr>
+      <tr><td>nouveau / nouvelle</td><td>nieuw</td><td>une nouvelle amie</td></tr>
+      <tr><td>vieux / vieille</td><td>oud</td><td>un vieux jean</td></tr>
+    </table>`
+},
+{
+  id:"adj-etre",
+  title:"Bijvoeglijk naamwoord met être",
+  prompt:"Waar moet je op letten als een bijvoeglijk naamwoord bij être staat?",
+  answerHTML:`
+    <h3>Ook met être</h3>
+    <div class="examplebox">Jean est <strong>grand</strong>.<br>Jeanne est <strong>grande</strong>.<br>Mes chaussures sont <strong>rouges</strong>.</div>
+    <h4>Checklist</h4>
+    <ul>
+      <li>Is het woord vrouwelijk? → vaak <strong>-e</strong></li>
+      <li>Is het meervoud? → vaak <strong>-s</strong></li>
+      <li>Allebei? → vaak <strong>-es</strong></li>
+      <li>Hoofdregel plaats? → meestal achter het zelfstandig naamwoord</li>
+    </ul>`
+},
+{
+  id:"neg-pas",
+  title:"ne ... pas",
+  prompt:"Hoe bouw je de gewone ontkenning in het Frans op?",
+  answerHTML:`
+    <h3>De ontkenning: ne ... pas</h3>
+    <ul>
+      <li>De ontkenning bestaat uit <strong>twee delen</strong>.</li>
+      <li><strong>ne</strong> staat vóór de persoonsvorm, <strong>pas</strong> erachter.</li>
+    </ul>
+    <div class="examplebox">Je <strong>ne</strong> danse <strong>pas</strong>.<br>Je <strong>ne</strong> veux <strong>pas</strong> déménager.</div>
+    <div class="notebox">Voor een klinker of stomme h verandert <strong>ne</strong> in <strong>n'</strong>.</div>
+    <div class="examplebox">Je <strong>n'</strong>aime <strong>pas</strong> l'anglais.<br>Martin <strong>n'</strong>habite <strong>pas</strong> ici.</div>`
+},
+{
+  id:"neg-overig",
+  title:"Andere ontkenningen",
+  prompt:"Welke andere veelvoorkomende ontkenningen moet je kennen?",
+  answerHTML:`
+    <h3>Andere ontkenningen</h3>
+    <table>
+      <tr><th>Frans</th><th>Nederlands</th></tr>
+      <tr><td>ne ... plus</td><td>niet meer / geen meer</td></tr>
+      <tr><td>ne ... jamais</td><td>nooit</td></tr>
+      <tr><td>ne ... rien</td><td>niets</td></tr>
+    </table>
+    <div class="examplebox">Gabriel <strong>n'a plus</strong> l'adresse de son oncle.<br>Il <strong>ne veut jamais</strong> faire ses devoirs.<br>Elle <strong>ne sait rien</strong>.</div>`
+},
+{
+  id:"neg-cest",
+  title:"C'est en spreektaal",
+  prompt:"Wat gebeurt er met de ontkenning bij c'est, ook in spreektaal?",
+  answerHTML:`
+    <h3>Bij c'est</h3>
+    <div class="examplebox">c'est → <strong>ce n'est pas</strong><br><br>Ce n'est pas drôle.</div>
+    <h4>Spreektaal</h4>
+    <div class="examplebox">C'est pas grave.</div>`
+},
+{
+  id:"numbers",
+  title:"Telwoorden 20–70",
+  prompt:"Kun je de belangrijkste telwoorden van 20 tot en met 70 reproduceren?",
+  answerHTML:`
+    <h3>Telwoorden 20–70</h3>
+    <table>
+      <tr><th>Getal</th><th>Frans</th></tr>
+      <tr><td>20</td><td>vingt</td></tr>
+      <tr><td>21</td><td>vingt-et-un</td></tr>
+      <tr><td>22</td><td>vingt-deux</td></tr>
+      <tr><td>23</td><td>vingt-trois</td></tr>
+      <tr><td>24</td><td>vingt-quatre</td></tr>
+      <tr><td>25</td><td>vingt-cinq</td></tr>
+      <tr><td>26</td><td>vingt-six</td></tr>
+      <tr><td>27</td><td>vingt-sept</td></tr>
+      <tr><td>28</td><td>vingt-huit</td></tr>
+      <tr><td>29</td><td>vingt-neuf</td></tr>
+      <tr><td>30</td><td>trente</td></tr>
+      <tr><td>31</td><td>trente-et-un</td></tr>
+      <tr><td>40</td><td>quarante</td></tr>
+      <tr><td>41</td><td>quarante-et-un</td></tr>
+      <tr><td>50</td><td>cinquante</td></tr>
+      <tr><td>51</td><td>cinquante-et-un</td></tr>
+      <tr><td>60</td><td>soixante</td></tr>
+      <tr><td>61</td><td>soixante-et-un</td></tr>
+      <tr><td>70</td><td>soixante-dix</td></tr>
+    </table>`
+},
+{
+  id:"prep",
+  title:"Voorzetsels",
+  prompt:"Kun je de basisvoorzetsels Nederlands ↔ Frans geven?",
+  answerHTML:`
+    <h3>Voorzetsels</h3>
+    <table>
+      <tr><th>Nederlands</th><th>Frans</th></tr>
+      <tr><td>in</td><td>dans</td></tr>
+      <tr><td>op</td><td>sur</td></tr>
+      <tr><td>onder</td><td>sous</td></tr>
+      <tr><td>achter</td><td>derrière</td></tr>
+      <tr><td>naast</td><td>à côté de</td></tr>
+      <tr><td>voor</td><td>devant</td></tr>
+    </table>`
+}
+];
+
+const drills = [
+  {id:"d1", q:"Vul aan: je ... / tu ... / il ... / nous ... / vous ... / ils ... (aller)", a:"vais / vas / va / allons / allez / vont"},
+  {id:"d2", q:"Wat is de futur proche?", a:"Vorm van aller + heel werkwoord."},
+  {id:"d3", q:"Vul aan: je ... / tu ... / il ... / nous ... / vous ... / ils ... (vouloir)", a:"veux / veux / veut / voulons / voulez / veulent"},
+  {id:"d4", q:"Hoe zeg je beleefd 'ik zou graag willen'?", a:"je voudrais"},
+  {id:"d5", q:"Welke uitgang krijgt een vrouwelijk bijvoeglijk naamwoord meestal?", a:"-e"},
+  {id:"d6", q:"Welke uitgang krijgt een meervoud meestal?", a:"-s"},
+  {id:"d7", q:"Welke uitgang krijgt vrouwelijk meervoud meestal?", a:"-es"},
+  {id:"d8", q:"Hoofdregel plaats bijvoeglijk naamwoord in het Frans?", a:"Meestal achter het zelfstandig naamwoord."},
+  {id:"d9", q:"Noem drie bekende uitzonderingen die vaak vóór het zelfstandig naamwoord staan.", a:"Bijv. grand, petit, joli, beau, bon, nouveau, vieux."},
+  {id:"d10", q:"Wat controleer je bij een bijvoeglijk naamwoord met être?", a:"Geslacht en getal: vrouwelijk/meervoud."},
+  {id:"d11", q:"Hoe bouw je ne ... pas op?", a:"ne vóór de persoonsvorm, pas erachter."},
+  {id:"d12", q:"Wat wordt ne voor een klinker of stomme h?", a:"n'"},
+  {id:"d13", q:"Betekenis van ne ... plus", a:"niet meer / geen meer"},
+  {id:"d14", q:"Betekenis van ne ... jamais", a:"nooit"},
+  {id:"d15", q:"Betekenis van ne ... rien", a:"niets"},
+  {id:"d16", q:"Wat wordt c'est in een gewone ontkenning?", a:"ce n'est pas"},
+  {id:"d17", q:"Hoe hoor je dat vaak in spreektaal?", a:"c'est pas"},
+  {id:"d18", q:"20 in het Frans", a:"vingt"},
+  {id:"d19", q:"21 in het Frans", a:"vingt-et-un"},
+  {id:"d20", q:"30 in het Frans", a:"trente"},
+  {id:"d21", q:"40 in het Frans", a:"quarante"},
+  {id:"d22", q:"50 in het Frans", a:"cinquante"},
+  {id:"d23", q:"60 in het Frans", a:"soixante"},
+  {id:"d24", q:"70 in het Frans", a:"soixante-dix"},
+  {id:"d25", q:"Frans voor 'in'", a:"dans"},
+  {id:"d26", q:"Frans voor 'op'", a:"sur"},
+  {id:"d27", q:"Frans voor 'onder'", a:"sous"},
+  {id:"d28", q:"Frans voor 'achter'", a:"derrière"},
+  {id:"d29", q:"Frans voor 'naast'", a:"à côté de"},
+  {id:"d30", q:"Frans voor 'voor'", a:"devant"}
+];
+
+let mode = 'rules';
+let direction = 'normal';
+let allDeck = rules;
+let currentList = [...allDeck];
+let idx = 0;
+let difficult = JSON.parse(localStorage.getItem('fr_grammar_u5_difficult_template') || '[]');
+let filterOn = false;
+
+function currentItem(){ return currentList[idx]; }
+
+function save(){
+  localStorage.setItem('fr_grammar_u5_difficult_template', JSON.stringify(difficult));
+  localStorage.setItem('fr_grammar_u5_mode_template', mode);
+  localStorage.setItem('fr_grammar_u5_direction_template', direction);
+  localStorage.setItem('fr_grammar_u5_idx_' + mode + '_template', idx);
+}
+function load(){
+  const m = localStorage.getItem('fr_grammar_u5_mode_template'); if(m) mode = m;
+  const d = localStorage.getItem('fr_grammar_u5_direction_template'); if(d) direction = d;
+  setMode(mode, true);
+  const savedIdx = parseInt(localStorage.getItem('fr_grammar_u5_idx_' + mode + '_template') || '0', 10);
+  idx = Math.min(savedIdx, Math.max(0, currentList.length - 1));
+}
+function isMarked(item){ return difficult.includes(item.id); }
+
+function render(){
+  const item = currentItem();
+  const card = document.getElementById('card');
+  card.classList.remove('is-flipped');
+  card.classList.toggle('marked', isMarked(item));
+
+  if(mode === 'rules'){
+    document.getElementById('frontLabel').textContent = direction === 'normal' ? 'Regelkaart' : 'Toetsprompt';
+    document.getElementById('backLabel').textContent = direction === 'normal' ? 'Uitleg' : 'Volledige regel';
+    if(direction === 'normal'){
+      document.getElementById('frontTitle').textContent = item.title;
+      document.getElementById('frontSub').textContent = item.prompt;
+      document.getElementById('backContent').innerHTML = item.answerHTML;
+    } else {
+      document.getElementById('frontTitle').textContent = item.prompt;
+      document.getElementById('frontSub').textContent = 'Noem de regel, vorm en voorbeelden.';
+      document.getElementById('backContent').innerHTML = `<h3>${item.title}</h3>` + item.answerHTML;
+    }
+  } else {
+    document.getElementById('frontLabel').textContent = direction === 'normal' ? 'Toetsdrill' : 'Antwoord → vraag';
+    document.getElementById('backLabel').textContent = 'Antwoord';
+    if(direction === 'normal'){
+      document.getElementById('frontTitle').textContent = item.q;
+      document.getElementById('frontSub').textContent = 'Zeg het eerst zelf hardop voordat je omdraait.';
+      document.getElementById('backContent').innerHTML = `<h3>${item.a}</h3>`;
+    } else {
+      document.getElementById('frontTitle').textContent = item.a;
+      document.getElementById('frontSub').textContent = 'Van welk toetsitem was dit het antwoord?';
+      document.getElementById('backContent').innerHTML = `<h3>${item.q}</h3>`;
+    }
+  }
+
+  document.getElementById('progress').textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+  document.getElementById('filterBtn').textContent = `Focus op moeilijk (${difficult.length})`;
+  document.getElementById('dirBtn').textContent = direction === 'normal' ? '🔄 Normaal' : '🔄 Omgekeerd';
+  document.getElementById('tab-rules').classList.toggle('active', mode === 'rules');
+  document.getElementById('tab-drill').classList.toggle('active', mode === 'drill');
+  save();
+}
+
+function setMode(newMode, silent=false){
+  mode = newMode;
+  allDeck = mode === 'rules' ? rules : drills;
+  currentList = filterOn ? allDeck.filter(x => difficult.includes(x.id)) : [...allDeck];
+  if(!silent) idx = 0;
+  if(currentList.length === 0){ filterOn = false; currentList = [...allDeck]; idx = 0; }
+  render();
+}
+function flip(){ document.getElementById('card').classList.toggle('is-flipped'); }
+function prev(){ idx = (idx - 1 + currentList.length) % currentList.length; render(); }
+function next(){ idx = (idx + 1) % currentList.length; render(); }
+function shuffleDeck(){ currentList.sort(() => Math.random() - .5); idx = 0; render(); }
+function toggleDirection(){ direction = direction === 'normal' ? 'reverse' : 'normal'; render(); }
+function mark(){
+  const id = currentItem().id;
+  if(difficult.includes(id)) difficult = difficult.filter(x => x !== id);
+  else difficult.push(id);
+  render();
+}
+function toggleFilter(){
+  filterOn = !filterOn;
+  setMode(mode);
+}
+function resetProgress(){
+  if(!confirm('Weet je zeker dat je de voortgang wilt wissen?')) return;
+  difficult = [];
+  filterOn = false;
+  idx = 0;
+  save();
+  setMode(mode);
+}
+function openList(){
+  document.getElementById('listModal').classList.add('show');
+  document.getElementById('searchInput').value = '';
+  renderList();
+}
+function closeList(){ document.getElementById('listModal').classList.remove('show'); }
+function renderList(){
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const list = (mode === 'rules' ? rules : drills).filter(item => {
+    const hay = JSON.stringify(item).toLowerCase();
+    return hay.includes(q);
+  });
+  const container = document.getElementById('listContainer');
+  container.innerHTML = list.map((item, i) => `
+    <div class="item" onclick="jumpTo('${item.id}')">
+      <div>
+        <strong>${mode === 'rules' ? item.title : item.q}</strong>
+        <div>${mode === 'rules' ? item.prompt : item.a}</div>
+      </div>
+      <div>${difficult.includes(item.id) ? '❌' : ''}</div>
+    </div>
+  `).join('') || '<p>Geen resultaten.</p>';
+}
+function jumpTo(id){
+  currentList = filterOn ? (mode === 'rules' ? rules : drills).filter(x => difficult.includes(x.id)) : [...(mode === 'rules' ? rules : drills)];
+  const found = currentList.findIndex(x => x.id === id);
+  if(found >= 0) idx = found;
+  closeList();
+  render();
+}
+function toggleReference(){
+  const box = document.getElementById('refbox');
+  box.classList.toggle('show');
+  if(!box.classList.contains('show')) return;
+  box.innerHTML = `
+    <h3 style="margin-top:0">Overzicht U5</h3>
+    <div class="row">
+      <span class="pill">aller + futur proche</span>
+      <span class="pill">vouloir / je voudrais</span>
+      <span class="pill">bijvoeglijk naamwoord: vorm</span>
+      <span class="pill">bijvoeglijk naamwoord: plaats</span>
+      <span class="pill">bijvoeglijk naamwoord met être</span>
+      <span class="pill">ne ... pas</span>
+      <span class="pill">ne ... plus / jamais / rien</span>
+      <span class="pill">ce n'est pas / c'est pas</span>
+      <span class="pill">telwoorden 20–70</span>
+      <span class="pill">voorzetsels</span>
+    </div>
+    <p style="margin-top:12px">Tik op een kaart om hem om te draaien. Gebruik <strong>Toetsdrill</strong> om echt actief te reproduceren. Met <strong>Omgekeerd</strong> kun je ook vanaf het antwoord terug naar de vraag trainen.</p>
+  `;
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') next();
+  else if(e.key === 'ArrowLeft') prev();
+  else if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); flip(); }
+});
+load();
+render();
+</script>
+</body>
+</html>

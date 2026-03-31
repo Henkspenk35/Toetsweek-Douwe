@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Frans Phrases U5</title>
+  <style>
+    :root { --primary: #2c3e50; --orange: #f39c12; --blue: #3498db; --bg: #f4f7f6; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    .scene { width: 100%; max-width: 420px; height: 300px; perspective: 1000px; margin: 20px 0; }
+    .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; cursor: pointer; }
+    .card.is-flipped { transform: rotateY(180deg); }
+    .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 25px; box-sizing: border-box; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: white; border: 1px solid #ddd; overflow-wrap: break-word; }
+    .card-front { color: var(--primary); }
+    .card-back { background: var(--primary); color: white; transform: rotateY(180deg); }
+    .label { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px; opacity: 0.55; letter-spacing: 1px; }
+    .star { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--orange); display: none; }
+    .is-marked .star { display: block; }
+    .is-marked .card-face { border: 3px solid var(--orange); }
+    .phrase { font-size: 1.45rem; line-height: 1.4; font-weight: 600; }
+    .speak-btn { margin-top: 20px; background: var(--blue); color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 420px; }
+    button { padding: 15px; border: none; border-radius: 15px; background: white; color: var(--primary); font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+    .btn-orange { background: var(--orange); color: white; grid-column: span 2; }
+    .btn-blue { background: var(--blue); color: white; grid-column: span 2; }
+    .btn-dark { background: var(--primary); color: white; grid-column: span 2; }
+    #list-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+    .search-box { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 1rem; box-sizing: border-box; }
+    .word-item { display: flex; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .word-item .nl { font-weight: bold; }
+    .word-item .fr { color: #666; margin-top: 6px; }
+    .sort-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+    .sort-bar button { flex: 1; padding: 8px; font-size: 0.7rem; background: #eee; }
+    .sort-bar button.active { background: var(--primary); color: white; }
+    .progress { margin-top: 15px; color: #7f8c8d; font-size: 0.85rem; font-weight: bold; }
+    .close-list { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 15px 25px; border-radius: 30px; z-index: 20; }
+  </style>
+</head>
+<body>
+  <h3 style="color: var(--primary); margin-top: 10px;">Frans – phrases</h3>
+
+  <div class="scene" onclick="flip()">
+    <div class="card" id="card-element">
+      <div class="card-face card-front">
+        <div class="star">★</div>
+        <div class="label" id="label-front">Nederlands</div>
+        <div id="text-front" class="phrase">...</div>
+        <button class="speak-btn" onclick="event.stopPropagation(); speak();">🔊</button>
+      </div>
+      <div class="card-face card-back">
+        <div class="label" id="label-back">Frans</div>
+        <div id="text-back" class="phrase">...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prev()">⬅️ Vorige</button>
+    <button onclick="next()">Volgende ➡️</button>
+    <button class="btn-orange" onclick="mark()">❌ Ken ik nog niet</button>
+    <button onclick="shuffle()">🔀 Husselen</button>
+    <button id="lang-btn" onclick="toggleLang()">🔄 FR ➔ NL</button>
+    <button id="filter-btn" onclick="toggleFilter()">Focus op moeilijk (0)</button>
+    <button class="btn-blue" onclick="openList()">📋 Zinnenlijst & Zoeken</button>
+    <button class="btn-dark" style="opacity: 0.5; font-size: 0.7rem;" onclick="resetProgress()">🗑️ Voortgang wissen</button>
+  </div>
+
+  <div class="progress" id="progress">Kaart 1 van ...</div>
+
+  <div id="list-modal">
+    <div style="position: sticky; top: 0; background: white; padding-bottom: 10px;">
+      <input type="text" class="search-box" id="search-input" placeholder="Zoek zin..." oninput="renderList()">
+      <div class="sort-bar">
+        <button id="sort-std" class="active" onclick="setSort('std')">Standaard</button>
+        <button id="sort-diff" onclick="setSort('diff')">Moeilijk ★</button>
+      </div>
+    </div>
+    <div id="list-container"></div>
+    <button class="close-list" onclick="closeList()">SLUITEN ✖</button>
+  </div>
+
+  <script>
+    const allPhrases = [
+      { nl: "Wat trek je aan op het feest van Sophie?", fr: "Qu’est-ce que tu mets pour la fête de Sophie ?" },
+      { nl: "Ik trek mijn zwarte jurk aan met mijn witte sportschoenen.", fr: "Je mets ma robe noire avec mes baskets blanches." },
+      { nl: "Wat is uw maat?", fr: "Quelle est votre taille ?" },
+      { nl: "Mijn maat is 38 of 40.", fr: "Ma taille, c’est 38 ou 40." },
+      { nl: "Hoeveel kosten de rugtassen?", fr: "Les sacs à dos coûtent combien ?" },
+      { nl: "Ze kosten 25 euro. Dat is niet duur.", fr: "Ils coûtent 25 euros. Ce n’est pas cher." },
+      { nl: "Kunt u ons helpen alstublieft?", fr: "Est-ce que vous pouvez nous aider, s’il vous plaît ?" },
+
+      { nl: "Wat is je kledingstijl?", fr: "C’est quoi ton style de vêtements ?" },
+      { nl: "Voor mij is de prijs het belangrijkst.", fr: "Pour moi, le prix est le plus important." },
+      { nl: "Ik koop nooit merkkleding.", fr: "Je n’achète jamais de vêtements de marque." },
+      { nl: "Ik draag vaak sportieve kleding.", fr: "Je porte souvent des vêtements sportifs." },
+      { nl: "Het is in de mode, maar het staat me helemaal niet.", fr: "C’est tendance, mais ça ne me va pas du tout." },
+      { nl: "Ik vind dat te gek omdat ik dol ben op kleuren.", fr: "Je trouve ça cool parce que j’adore les couleurs." },
+      { nl: "Zij heeft lang blond haar.", fr: "Elle a les cheveux longs et blonds." },
+
+      { nl: "Pardon, ik zoek de Stationsstraat.", fr: "Pardon, je cherche la Rue de la Gare." },
+      { nl: "Het spijt me, ik weet het niet.", fr: "Désolé, je ne sais pas." },
+      { nl: "Je moet rechtdoor gaan tot aan de stoplichten.", fr: "Il faut continuer tout droit jusqu’aux feux." },
+      { nl: "Je neemt de tweede straat rechts.", fr: "Tu prends la deuxième rue à droite." },
+      { nl: "Op het kruispunt steekt u de straat over.", fr: "Au carrefour, vous traversez la rue." },
+      { nl: "Hoe ziet jouw kamer eruit?", fr: "Elle est comment, ta chambre ?" },
+      { nl: "Mijn kast staat tegen de muur.", fr: "Mon armoire est contre le mur." },
+
+      { nl: "Hoeveel kamers hebben jullie?", fr: "Vous avez combien de pièces ?" },
+      { nl: "De woonkamer is op de begane grond.", fr: "Au rez-de-chaussée, il y a la salle de séjour." },
+      { nl: "In de tuin staan veel bloemen en bomen.", fr: "Dans le jardin, il y a beaucoup de fleurs et d’arbres." },
+      { nl: "Op welke verdieping is jouw slaapkamer?", fr: "Ta chambre est à quel étage ?" },
+      { nl: "Mijn slaapkamer is op de tweede verdieping, op de zolder.", fr: "Ma chambre est au deuxième étage, au grenier." },
+      { nl: "Om naar de eerste verdieping te gaan, neem ik de trap.", fr: "Pour aller au premier étage, je prends l’escalier." },
+      { nl: "Ik woon in een rustige wijk en de winkels zijn dichtbij.", fr: "J’habite dans un quartier calme et les magasins sont tout près." }
+    ];
+
+    let difficultPhrases = [];
+    let currentList = [...allPhrases];
+    let idx = 0;
+    let isFrToNl = false;
+    let filterOn = false;
+    let sortMode = 'std';
+
+    const card = document.getElementById('card-element');
+    const textFront = document.getElementById('text-front');
+    const textBack = document.getElementById('text-back');
+    const prog = document.getElementById('progress');
+
+    function load() {
+      const saved = JSON.parse(localStorage.getItem('frans_phrases_u5') || '{}');
+      if (saved.diffIndices) difficultPhrases = saved.diffIndices.map(i => allPhrases[i]).filter(Boolean);
+      if (saved.lastIdx !== undefined) idx = Math.min(saved.lastIdx, currentList.length - 1);
+      if (saved.isFrToNl !== undefined) isFrToNl = saved.isFrToNl;
+    }
+
+    function save() {
+      localStorage.setItem('frans_phrases_u5', JSON.stringify({
+        diffIndices: difficultPhrases.map(w => allPhrases.indexOf(w)),
+        lastIdx: idx,
+        isFrToNl
+      }));
+    }
+
+    function update() {
+      if (!currentList.length) return;
+      card.classList.remove('is-flipped');
+      const item = currentList[idx];
+      if (isFrToNl) {
+        textFront.textContent = item.fr;
+        textBack.textContent = item.nl;
+        document.getElementById('label-front').textContent = 'Frans';
+        document.getElementById('label-back').textContent = 'Nederlands';
+        document.getElementById('lang-btn').textContent = '🔄 NL ➔ FR';
+      } else {
+        textFront.textContent = item.nl;
+        textBack.textContent = item.fr;
+        document.getElementById('label-front').textContent = 'Nederlands';
+        document.getElementById('label-back').textContent = 'Frans';
+        document.getElementById('lang-btn').textContent = '🔄 FR ➔ NL';
+      }
+      prog.textContent = `Kaart ${idx + 1} van ${currentList.length}`;
+      card.classList.toggle('is-marked', difficultPhrases.includes(item));
+      document.getElementById('filter-btn').textContent = `Focus op moeilijk (${difficultPhrases.length})`;
+      save();
+    }
+
+    function flip() { card.classList.toggle('is-flipped'); }
+    function next() { idx = (idx + 1) % currentList.length; update(); }
+    function prev() { idx = (idx - 1 + currentList.length) % currentList.length; update(); }
+    function shuffle() { currentList.sort(() => Math.random() - 0.5); idx = 0; update(); }
+    function toggleLang() { isFrToNl = !isFrToNl; update(); }
+    function mark() {
+      const item = currentList[idx];
+      if (!difficultPhrases.includes(item)) difficultPhrases.push(item);
+      else difficultPhrases = difficultPhrases.filter(w => w !== item);
+      update();
+    }
+    function toggleFilter() {
+      filterOn = !filterOn;
+      currentList = filterOn ? [...difficultPhrases] : [...allPhrases];
+      if (currentList.length === 0 && filterOn) {
+        alert('Geen moeilijke zinnen!');
+        filterOn = false;
+        currentList = [...allPhrases];
+      }
+      idx = 0;
+      update();
+    }
+    function speak() {
+      const item = currentList[idx];
+      const utterance = new SpeechSynthesisUtterance(isFrToNl ? item.fr : item.fr);
+      utterance.lang = 'fr-FR';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function openList() { document.getElementById('list-modal').style.display = 'block'; renderList(); }
+    function closeList() { document.getElementById('list-modal').style.display = 'none'; }
+    function setSort(m) {
+      sortMode = m;
+      document.getElementById('sort-std').className = m === 'std' ? 'active' : '';
+      document.getElementById('sort-diff').className = m === 'diff' ? 'active' : '';
+      renderList();
+    }
+
+    function renderList() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      const container = document.getElementById('list-container');
+      container.innerHTML = '';
+      let list = allPhrases.map((w, i) => ({ ...w, origIdx: i }));
+      if (sortMode === 'diff') {
+        list.sort((a, b) => difficultPhrases.includes(allPhrases[b.origIdx]) - difficultPhrases.includes(allPhrases[a.origIdx]));
+      }
+      list.forEach(w => {
+        if (w.nl.toLowerCase().includes(q) || w.fr.toLowerCase().includes(q)) {
+          const div = document.createElement('div');
+          div.className = 'word-item';
+          div.innerHTML = `<div><div class="nl">${w.nl}</div><div class="fr">${w.fr}</div></div><span>${difficultPhrases.includes(allPhrases[w.origIdx]) ? '★' : ''}</span>`;
+          div.onclick = () => {
+            filterOn = false;
+            currentList = [...allPhrases];
+            idx = w.origIdx;
+            update();
+            closeList();
+          };
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function resetProgress() {
+      if (confirm('Wis voortgang?')) {
+        localStorage.removeItem('frans_phrases_u5');
+        location.reload();
+      }
+    }
+
+    load();
+    update();
+  </script>
+</body>
+</html>
