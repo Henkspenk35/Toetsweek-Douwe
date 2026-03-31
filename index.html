@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Toetsweek Douwe</title>
+  <meta name="theme-color" content="#2c3e50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Toetsweek">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root { --primary:#2c3e50; --blue:#3498db; --orange:#f39c12; --bg:#f4f7f6; --card:#ffffff; --muted:#60707f; --line:#e8edf1; --shadow:0 8px 24px rgba(0,0,0,.08); }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:linear-gradient(180deg,#eef3f6 0%, #f7f9fb 100%); color:var(--primary);}
+    .wrap{max-width:1040px; margin:0 auto; padding:18px 18px 32px;}
+    .hero{ background:linear-gradient(135deg,#2c3e50,#355d7a 55%, #4a7ea3); color:white; border-radius:28px; padding:22px 20px; box-shadow:0 12px 28px rgba(0,0,0,.16); margin-bottom:16px;}
+    .eyebrow{ font-size:.76rem; opacity:.82; text-transform:uppercase; letter-spacing:.1em; font-weight:800; margin-bottom:6px;}
+    h1{margin:0 0 8px; font-size:2rem; line-height:1.05}
+    .sub{margin:0; line-height:1.45; color:#e7edf3}
+    .hero-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;}
+    .action{ border:none; border-radius:14px; padding:12px 14px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.12); font-size:.95rem;}
+    .action.primary{background:white; color:var(--primary)}
+    .action.secondary{background:rgba(255,255,255,.14); color:white; border:1px solid rgba(255,255,255,.18)}
+    .panel{ background:white; border-radius:22px; padding:16px; box-shadow:var(--shadow); border:1px solid var(--line); margin-bottom:14px;}
+    .install-note{ display:none; font-size:.95rem; color:var(--muted); line-height:1.45; margin-top:8px;}
+    .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+    .stat{ background:#f7fafc; border:1px solid var(--line); border-radius:18px; padding:14px;}
+    .stat .num{font-size:1.4rem; font-weight:900}
+    .stat .lbl{font-size:.86rem; color:var(--muted); margin-top:4px}
+    .section-title{ font-size:1.05rem; font-weight:900; margin:2px 0 12px;}
+    .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;}
+    .tile{ display:block; text-decoration:none; color:inherit; background:var(--card); border-radius:22px; padding:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); border:1px solid var(--line); transition:transform .14s ease, box-shadow .14s ease; position:relative;}
+    .tile:hover{transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.09)}
+    .emoji{font-size:1.8rem; margin-bottom:10px}
+    .badge{ display:inline-block; font-size:.72rem; font-weight:900; letter-spacing:.07em; text-transform:uppercase; border-radius:999px; padding:6px 10px; margin-bottom:10px;}
+    .taal{background:#eef5fb; color:#28506b}
+    .theorie{background:#fdf2e3; color:#9a5d00}
+    .title{font-size:1.08rem; font-weight:900; line-height:1.25; margin-bottom:6px}
+    .desc{font-size:.94rem; color:var(--muted); line-height:1.42}
+    .progress-pill{ margin-top:12px; display:inline-block; background:#f7fafc; border:1px solid var(--line); border-radius:999px; padding:7px 10px; font-size:.82rem; font-weight:800; color:#576573;}
+    .tips{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px;}
+    .tip{ background:#f7fafc; border:1px solid var(--line); border-radius:18px; padding:14px; font-size:.93rem; line-height:1.45; color:#4e5c69;}
+    .footer{margin-top:18px; font-size:.88rem; color:#708090; text-align:center}
+    @media (max-width: 640px){ h1{font-size:1.72rem} .wrap{padding:14px 14px 28px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="eyebrow">Toetsweek-app</div>
+      <h1>Toetsweek Douwe</h1>
+      <p class="sub">Alle vakken op één plek. Open een trainer, markeer moeilijke kaarten en zet deze pagina op het beginscherm zodat hij als app opent.</p>
+      <div class="hero-actions">
+        <button class="action primary" id="installBtn" style="display:none;">📲 Installeer app</button>
+        <button class="action secondary" onclick="openRandom()">🎯 Willekeurig vak</button>
+      </div>
+      <div class="install-note" id="installNote"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Snel overzicht</div>
+      <div class="stats">
+        <div class="stat"><div class="num">7</div><div class="lbl">Trainers</div></div>
+        <div class="stat"><div class="num" id="progressCount">0</div><div class="lbl">Vakken met voortgang</div></div>
+        <div class="stat"><div class="num" id="markedCount">0</div><div class="lbl">Sets met moeilijke kaarten</div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <a class="tile" href="frans_u45.html"><div class="emoji">🇫🇷</div><span class="badge taal">Frans</span><div class="title">Frans vocabulaire</div><div class="desc">Woordenschattrainer met omdraaien, markeren, filter en woordenlijst.</div><div class="progress-pill" id="pill-frans_v20">Nog geen voortgang</div></a>
+<a class="tile" href="franse_grammatica_u5.html">
+  <div class="emoji">🧠</div>
+  <span class="badge theorie">Frans</span>
+  <div class="title">Frans grammatica</div>
+  <div class="desc">Regels + drill</div>
+  <div class="progress-pill" id="pill-frans_grammatica_u5">Nog geen voortgang</div>
+</a>
+
+<a class="tile" href="frans_phrases_u5.html">
+  <div class="emoji">💬</div>
+  <span class="badge taal">Frans</span>
+  <div class="title">Frans phrases</div>
+  <div class="desc">Zinnen oefenen</div>
+  <div class="progress-pill" id="pill-frans_phrases_u5">Nog geen voortgang</div>
+</a>
+
+      <a class="tile" href="engels_zinnen_u45.html"><div class="emoji">🇬🇧</div><span class="badge taal">Engels</span><div class="title">Engels vocabulary</div><div class="desc">Zinnen en woordenschat in flashcardvorm.</div><div class="progress-pill" id="pill-engels_master_u45">Nog geen voortgang</div></a>
+      <a class="tile" href="engels_phrases_u45.html"><div class="emoji">💬</div><span class="badge taal">Engels</span><div class="title">Engels phrases</div><div class="desc">Phrases en uitdrukkingen in een aparte trainer.</div><div class="progress-pill" id="pill-engels_phrases_u45">Nog geen voortgang</div></a>
+      <a class="tile" href="engelse_grammatica_1vwo.html"><div class="emoji">🧠</div><span class="badge theorie">Grammatica</span><div class="title">Engels grammar</div><div class="desc">Regelkaarten, toetsdrill en overzicht.</div><div class="progress-pill" id="pill-engelse_grammatica_1vwo">Nog geen voortgang</div></a>
+      <a class="tile" href="latijn_basiswoorden.html"><div class="emoji">🏛️</div><span class="badge taal">Latijn</span><div class="title">Latijn woordjes</div><div class="desc">Basiswoorden met dezelfde flashcardlogica.</div><div class="progress-pill" id="pill-latijn_v20">Nog geen voortgang</div></a>
+      <a class="tile" href="nederlands_begrippen.html"><div class="emoji">📘</div><span class="badge theorie">Nederlands</span><div class="title">Nederlands begrippen</div><div class="desc">Fictie, personages, spanning en argumentatie.</div><div class="progress-pill" id="pill-nederlands_begrippen_v1">Nog geen voortgang</div></a>
+      <a class="tile" href="biologie_thema4.html"><div class="emoji">🦴</div><span class="badge theorie">Biologie</span><div class="title">Biologie Thema 4</div><div class="desc">Stevigheid en beweging, zonder het skelet-overzicht.</div><div class="progress-pill" id="pill-biologie_thema4_v1">Nog geen voortgang</div></a>
+    </div>
+
+    <div class="panel" style="margin-top:14px;">
+      <div class="section-title">Handige tips</div>
+      <div class="tips">
+        <div class="tip"><strong>Installeren op iPhone:</strong> open de site in Safari, tik op <em>deel</em> en kies <em>Zet op beginscherm</em>.</div>
+        <div class="tip"><strong>Installeren op Android:</strong> open de site in Chrome en kies <em>Install app</em> of <em>Add to home screen</em>.</div>
+        <div class="tip"><strong>Leren:</strong> markeer moeilijke kaarten en gebruik daarna <em>Focus op moeilijk</em>.</div>
+      </div>
+    </div>
+
+    <div class="footer">Deze startpagina werkt ook offline nadat hij één keer geopend is.</div>
+  </div>
+
+  <script>
+    const subjectLinks = [
+      "frans_u45.html","engels_zinnen_u45.html","engels_phrases_u45.html",
+      "engelse_grammatica_1vwo.html","latijn_basiswoorden.html","nederlands_begrippen.html","biologie_thema4.html"
+    ];
+    function openRandom() {
+      location.href = subjectLinks[Math.floor(Math.random() * subjectLinks.length)];
+    }
+    function updateProgress() {
+      const keys = ["frans_v20","engels_master_u45","engels_phrases_u45","engelse_grammatica_1vwo","latijn_v20","nederlands_begrippen_v1","biologie_thema4_v1"];
+      let withProgress = 0, difficultSets = 0;
+      keys.forEach(key => {
+        const raw = localStorage.getItem(key);
+        const pill = document.getElementById("pill-" + key);
+        if (!pill) return;
+        if (!raw) { pill.textContent = "Nog geen voortgang"; return; }
+        try {
+          const data = JSON.parse(raw);
+          const diff = Array.isArray(data.diffIndices) ? data.diffIndices.length : 0;
+          const idx = typeof data.lastIdx === "number" ? data.lastIdx + 1 : 1;
+          withProgress++;
+          if (diff > 0) difficultSets++;
+          pill.textContent = diff > 0 ? `Kaart ${idx} • ${diff} moeilijk` : `Kaart ${idx} • bezig`;
+        } catch {
+          withProgress++;
+          pill.textContent = "Voortgang gevonden";
+        }
+      });
+      document.getElementById("progressCount").textContent = withProgress;
+      document.getElementById("markedCount").textContent = difficultSets;
+    }
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+    const installNote = document.getElementById("installNote");
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = "inline-block";
+      installNote.style.display = "block";
+      installNote.textContent = "Je browser ondersteunt installatie. Tik op ‘Installeer app’.";
+    });
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isInStandaloneMode = ("standalone" in window.navigator) && window.navigator.standalone;
+    if (isIOS && !isInStandaloneMode) {
+      installNote.style.display = "block";
+      installNote.textContent = "Op iPhone: open in Safari, tik op delen en kies ‘Zet op beginscherm’.";
+    }
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js?v=3"));
+    }
+    updateProgress();
+  </script>
+</body>
+</html>
